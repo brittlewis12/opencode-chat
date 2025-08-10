@@ -282,19 +282,6 @@ const server = serve({
       });
     },
 
-    // Handle permission queries
-    "/session/:sessionId/permissions": {
-      async GET(req) {
-        const sessionId = req.params.sessionId;
-        const response = await fetch(
-          `${OPENCODE_URL}/session/${sessionId}/permissions`,
-        );
-        return new Response(await response.text(), {
-          headers: { "Content-Type": "application/json" },
-        });
-      },
-    },
-
     // Handle permission responses
     "/session/:sessionId/permissions/:permissionId": {
       async POST(req) {
