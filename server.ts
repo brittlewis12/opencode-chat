@@ -309,10 +309,30 @@ const html = `<!DOCTYPE html>
             }
             
             if (msg.info.role === 'user') {
-              // User messages - find the text part
+              // User messages - append in chronological order
               const textPart = msg.parts?.find(p => p.type === 'text' && p.text);
               if (textPart) {
-                addMessage(textPart.text.trim(), 'user', timestamp);
+                const wrapperEl = document.createElement('div');
+                wrapperEl.className = 'flex flex-col mb-4';
+                
+                const messageRow = document.createElement('div');
+                messageRow.className = 'flex justify-end';
+                
+                const bubbleEl = document.createElement('div');
+                bubbleEl.className = 'max-w-[85%] px-4 py-2 rounded-lg text-white';
+                bubbleEl.style.background = 'linear-gradient(to right, #9333ea, #3b82f6)';
+                bubbleEl.textContent = textPart.text.trim();
+                
+                messageRow.appendChild(bubbleEl);
+                wrapperEl.appendChild(messageRow);
+                
+                const timeEl = document.createElement('div');
+                timeEl.className = 'text-right text-xs text-gray-500 dark:text-gray-400 mt-1 mr-2';
+                const time = timestamp ? new Date(timestamp) : new Date();
+                timeEl.textContent = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                wrapperEl.appendChild(timeEl);
+                
+                messagesEl.appendChild(wrapperEl);
               }
             } else if (msg.info.role === 'assistant') {
               // Build full message content including tool calls
