@@ -194,6 +194,18 @@ const server = serve({
       });
     },
 
+    // Delete session endpoint
+    "/session/:sessionId": async (req) => {
+      if (req.method === "DELETE") {
+        const sessionId = req.params.sessionId;
+        const response = await fetch(`${OPENCODE_URL}/session/${sessionId}`, {
+          method: "DELETE",
+        });
+        return new Response(null, { status: response.ok ? 204 : response.status });
+      }
+      return new Response("Method not allowed", { status: 405 });
+    },
+
     // History endpoint
     "/history": async (req) => {
       const url = new URL(req.url);
@@ -222,6 +234,58 @@ const server = serve({
       const sessionId = req.params.sessionId;
       const state = await opencodeClient.getSessionState(sessionId);
       return Response.json(state);
+    },
+
+    // Recovery endpoint to handle all pending permissions
+    "/session/:sessionId/permissions/handle-all": async (req) => {
+      if (req.method !== "POST") {
+        return new Response("Method not allowed", { status: 405 });
+      }
+      
+      const sessionId = req.params.sessionId;
+      const body = await req.json();
+      const action = body.action || "reject"; // "accept" | "reject"
+      const responseType = action === "accept" ? "once" : "reject";
+      
+      const state = await opencodeClient.getSessionState(sessionId);
+      
+      // Handle all pending permissions
+      const handled = [];
+      const failed = [];
+      if (state?.permissions?.queue) {
+        for (const permId of state.permissions.queue) {
+          const perm = state.permissions.byId?.[permId];
+          if (perm) {
+            try {
+              const response = await fetch(
+                `${OPENCODE_URL}/session/${sessionId}/permissions/${permId}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ response: responseType }),
+                }
+              );
+              if (response.ok) {
+                handled.push(permId);
+              } else {
+                failed.push(permId);
+              }
+            } catch (e) {
+              console.error(`Failed to ${action} permission ${permId}:`, e);
+              failed.push(permId);
+            }
+          }
+        }
+      }
+      
+      return Response.json({ 
+        action, 
+        handled, 
+        failed,
+        totalCount: handled.length + failed.length,
+        handledCount: handled.length,
+        failedCount: failed.length
+      });
     },
 
     // SSE endpoint for streaming state updates to browser

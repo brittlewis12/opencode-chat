@@ -87,7 +87,7 @@ class OpenCodeClient {
             if (!dataPayload) continue;
             try {
               const data = JSON.parse(dataPayload);
-              // console.log('[OpenCode Event]', data.type, data)
+              console.log('[OpenCode Event]', data.type);
               this.handleEvent(data);
             } catch (e) {
               console.error("Failed to parse SSE JSON:", e);
@@ -353,24 +353,10 @@ class OpenCodeClient {
     providerId: string,
     agent: string,
   ) {
-    // Create message ID
-    const timestamp = Date.now();
-    const timestampHex = (timestamp * 0x1000).toString(16).padStart(12, "0");
-    const randomChars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let random = "";
-    for (let i = 0; i < 14; i++) {
-      random += randomChars.charAt(
-        Math.floor(Math.random() * randomChars.length),
-      );
-    }
-    const messageId = `msg_${timestampHex}${random}`;
-
     const payload = {
       providerID: providerId,
       modelID: modelId,
       agent: agent,
-      messageID: messageId,
       parts: [{ type: "text", text: message }],
     };
 
