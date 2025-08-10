@@ -1,14 +1,18 @@
 # OpenCode Chat
 
-A lightweight web interface for OpenCode, providing a chat-based UI for AI-powered development assistance.
+A modern web interface for [OpenCode](https://github.com/opencodeco/opencode), providing a ChatGPT-like experience with local AI model management.
 
 ## Features
 
 - 🚀 **Real-time streaming** - Server-sent events (SSE) for live response streaming
-- 💬 **Session management** - Persistent sessions with localStorage
+- 💬 **Session management** - Persistent sessions with full history
 - 🎨 **Markdown rendering** - Full markdown support with syntax highlighting
 - 📊 **Usage tracking** - Context usage, costs, and model information display
 - 🔄 **Mode switching** - Support for build, plan, and custom agent modes
+- 🎯 **Multi-model support** - Anthropic, OpenAI, GitHub Models, Google, and more
+- 🔒 **Inline permissions** - Handle tool approval directly in chat
+- ⚡ **Zero build step** - Bun-native JSX transpilation
+- 🖥️ **Console streaming** - Browser console logs in terminal (Bun 1.2.20+)
 - 📱 **Responsive design** - Mobile-first, works on all devices
 
 ## Quick Start
@@ -17,16 +21,20 @@ A lightweight web interface for OpenCode, providing a chat-based UI for AI-power
 # Install dependencies
 bun install
 
-# Start the server
-bun run server.ts
+# Start development server (with file watching)
+bun run dev
+
+# Or start production server
+bun start
 ```
 
-The server will start on http://localhost:3000
+The server will start on http://localhost:3000 and automatically spawn OpenCode if not running.
 
 ## Prerequisites
 
-- [Bun](https://bun.sh) runtime
-- [OpenCode](https://opencode.ai) server running on port 4096
+- [Bun](https://bun.sh) v1.2.20 or higher
+- [OpenCode](https://github.com/opencodeco/opencode) installed globally
+- API keys configured for your preferred AI providers
 
 ## Architecture
 

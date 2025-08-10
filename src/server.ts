@@ -1,8 +1,9 @@
-import { serve } from "bun";
-import { spawn } from "bun";
+import { serve, file, spawn } from "bun";
 import OpenCodeClient from "./opencode-client";
 
-const OPENCODE_URL = "http://localhost:4096";
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+const OPENCODE_URL = process.env.OPENCODE_URL || "http://localhost:4096";
+const isDev = process.env.NODE_ENV !== "production";
 
 // Check if OpenCode is already running
 async function checkOpenCode() {
@@ -92,10 +93,15 @@ opencodeClient.addListener((sessionId, state) => {
   }
 });
 
-// Proxy server
+// Proxy server with native React support
 serve({
-  port: 3000,
+  port: PORT,
   idleTimeout: 120, // 2 minutes timeout for long responses
+
+  // Enable browser console streaming (Bun 1.2.20 feature)
+  development: isDev ? {
+    console: true,  // Stream browser console logs to terminal
+  } : undefined,
 
   async fetch(req) {
     const url = new URL(req.url);
@@ -235,15 +241,18 @@ serve({
             encoder.encode(`data: ${JSON.stringify({ sessionId, state })}\n\n`),
           );
 
-          // Send keepalive every 30 seconds
+          // Send keepalive every 30 seconds (was incorrectly set to 10 seconds)
           const keepalive = setInterval(() => {
             try {
               controller.enqueue(encoder.encode(":keepalive\n\n"));
             } catch (e) {
               clearInterval(keepalive);
               browserConnections.get(sessionId)?.delete(controller);
+              if (browserConnections.get(sessionId)?.size === 0) {
+                browserConnections.delete(sessionId);
+              }
             }
-          }, 10000);
+          }, 30000);
 
           // Cleanup on close
           req.signal.addEventListener("abort", () => {
@@ -360,10 +369,70 @@ serve({
       }
     }
 
+    // Serve index.html for root
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      const indexFile = file("./src/index.html");
+      if (await indexFile.exists()) {
+        return new Response(indexFile, {
+          headers: { "Content-Type": "text/html" }
+        });
+      }
+    }
+    
+    // Serve static files with automatic JSX/TSX transpilation
+    const filePath = `./src${url.pathname}`;
+    const staticFile = file(filePath);
+    
+    if (await staticFile.exists()) {
+      const ext = url.pathname.split('.').pop();
+      
+      // Transpile JS/JSX/TS/TSX files on the fly
+      if (['js', 'jsx', 'ts', 'tsx'].includes(ext || '')) {
+        const transpiler = new Bun.Transpiler({
+          loader: ext as any,
+          jsx: "react",
+          tsconfig: {
+            compilerOptions: {
+              jsx: "react",
+              jsxFactory: "React.createElement",
+              jsxFragmentFactory: "React.Fragment",
+            }
+          }
+        });
+        
+        const code = await staticFile.text();
+        const transpiled = await transpiler.transform(code);
+        
+        return new Response(transpiled, {
+          headers: { 
+            "Content-Type": "application/javascript",
+            "Cache-Control": isDev ? "no-cache" : "public, max-age=3600"
+          }
+        });
+      }
+      
+      // Serve other static files
+      const contentType = {
+        'css': 'text/css',
+        'html': 'text/html',
+        'json': 'application/json',
+        'svg': 'image/svg+xml',
+        'png': 'image/png',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+      }[ext || ''] || 'text/plain';
+      
+      return new Response(staticFile, {
+        headers: { "Content-Type": contentType }
+      });
+    }
+
     console.log(`Unhandled request: ${req.method} ${url.pathname}`);
     return new Response("Not found", { status: 404 });
   },
 });
 
-console.log("OpenCode Chat server running on http://localhost:3000");
-console.log("Make sure OpenCode server is running on port 4096");
+console.log(`OpenCode Chat server running on http://localhost:${PORT}`);
+if (isDev) {
+  console.log("Browser console logs will be streamed to this terminal");
+}
