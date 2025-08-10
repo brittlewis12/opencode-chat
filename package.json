@@ -1,16 +1,36 @@
 {
   "name": "opencode-chat",
-  "module": "server.ts",
+  "module": "src/server.ts",
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun run server.ts",
-    "dev": "bun --watch server.ts"
+    "start": "bun run src/server.ts",
+    "dev": "concurrently \"bun --watch src/server.ts\" \"bunx vite\"",
+    "dev:server": "bun --watch src/server.ts",
+    "dev:client": "bunx vite",
+    "build": "bunx vite build",
+    "check": "bunx tsc --noEmit",
+    "preview": "bunx vite preview"
   },
   "devDependencies": {
-    "@types/bun": "1.2.20"
+    "@types/bun": "1.2.20",
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.2.0",
+    "vite": "^7.1.1"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.84.2",
+    "@tanstack/react-router": "^1.131.2",
+    "@types/dompurify": "^3.2.0",
+    "@types/marked": "^6.0.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "dompurify": "^3.2.6",
+    "marked": "^16.1.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   }
 }

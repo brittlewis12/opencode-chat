@@ -1,8 +1,4 @@
-import { serve } from "bun";
-
-const OPENCODE_URL = "http://localhost:4096";
-
-// Simple HTML with distinctive UI
+// Removed old HTML - using React app instead
 const html = `<!DOCTYPE html>
 <html lang="en" class="bg-gradient-to-br from-slate-800 to-slate-900">
 <head>
@@ -122,6 +118,52 @@ const html = `<!DOCTYPE html>
     </div>
   </div>
 
+  <!-- Permission Modal -->
+  <div id="permissionModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6">
+      <div class="mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Permission Request
+        </h3>
+        <p id="permissionTitle" class="text-gray-700 dark:text-gray-300"></p>
+      </div>
+      
+      <div class="mb-6">
+        <div class="bg-gray-100 dark:bg-slate-700 rounded p-3 text-sm">
+          <div class="text-gray-600 dark:text-gray-400 mb-1">Type: <span id="permissionType"></span></div>
+          <div id="permissionPatternContainer" class="text-gray-600 dark:text-gray-400 mb-1 hidden">Pattern: <span id="permissionPattern"></span></div>
+          <details id="permissionDetailsContainer" class="mt-2 hidden">
+            <summary class="cursor-pointer text-gray-600 dark:text-gray-400">
+              Details
+            </summary>
+            <pre id="permissionMetadata" class="mt-2 text-xs overflow-auto"></pre>
+          </details>
+        </div>
+      </div>
+      
+      <div class="flex gap-2">
+        <button
+          id="permissionAllowOnce"
+          class="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+        >
+          Allow Once
+        </button>
+        <button
+          id="permissionAllowAlways"
+          class="flex-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+        >
+          Allow Always
+        </button>
+        <button
+          id="permissionReject"
+          class="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+        >
+          Reject
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Check if libraries loaded
     console.log('Marked available?', typeof marked);
@@ -134,6 +176,76 @@ const html = `<!DOCTYPE html>
     let eventSource = null;
     const messages = new Map();  // Track all messages: messageId -> { element, role, text }
     let thinkingIndicator = null;
+    let currentPermission = null;
+
+    // Permission handling functions
+    function showPermissionModal(permission) {
+      console.log('Showing permission modal:', permission);
+      currentPermission = permission;
+      
+      // Populate modal content
+      document.getElementById('permissionTitle').textContent = permission.title;
+      document.getElementById('permissionType').textContent = permission.type;
+      
+      if (permission.pattern) {
+        document.getElementById('permissionPattern').textContent = permission.pattern;
+        document.getElementById('permissionPatternContainer').classList.remove('hidden');
+      } else {
+        document.getElementById('permissionPatternContainer').classList.add('hidden');
+      }
+      
+      if (Object.keys(permission.metadata || {}).length > 0) {
+        document.getElementById('permissionMetadata').textContent = JSON.stringify(permission.metadata, null, 2);
+        document.getElementById('permissionDetailsContainer').classList.remove('hidden');
+      } else {
+        document.getElementById('permissionDetailsContainer').classList.add('hidden');
+      }
+      
+      // Show modal
+      document.getElementById('permissionModal').classList.remove('hidden');
+    }
+
+    function hidePermissionModal() {
+      document.getElementById('permissionModal').classList.add('hidden');
+      currentPermission = null;
+    }
+
+    async function respondToPermission(response) {
+      if (!currentPermission) return;
+      
+      try {
+        const res = await fetch('/session/' + currentPermission.sessionID + '/permissions/' + currentPermission.id, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ response })
+        });
+        
+        if (res.ok) {
+          hidePermissionModal();
+          console.log('Permission response sent:', response);
+        } else {
+          console.error('Failed to send permission response:', await res.text());
+          alert('Failed to send permission response. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error sending permission response:', error);
+        alert('Error sending permission response. Please try again.');
+      }
+    }
+
+    // Set up permission modal event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('permissionAllowOnce').addEventListener('click', () => respondToPermission('once'));
+      document.getElementById('permissionAllowAlways').addEventListener('click', () => respondToPermission('always'));
+      document.getElementById('permissionReject').addEventListener('click', () => respondToPermission('reject'));
+      
+      // Close modal when clicking outside
+      document.getElementById('permissionModal').addEventListener('click', (e) => {
+        if (e.target.id === 'permissionModal') {
+          hidePermissionModal();
+        }
+      });
+    });
 
     // Fetch model names from OpenCode and populate selector
     fetch('/config/providers')
@@ -184,7 +296,7 @@ const html = `<!DOCTYPE html>
           optgroup.label = provider;
           models.forEach(model => {
             const option = document.createElement('option');
-            option.value = model.id;
+            option.value = JSON.stringify({ id: model.id, provider: model.provider });
             option.textContent = model.name;
             optgroup.appendChild(option);
           });
@@ -195,16 +307,35 @@ const html = `<!DOCTYPE html>
         const savedModel = localStorage.getItem('opencodePreferredModel');
         const defaultModel = 'claude-opus-4-1-20250805';
 
-        if (savedModel && models[savedModel]) {
-          modelSelect.value = savedModel;
-        } else if (models[defaultModel]) {
-          modelSelect.value = defaultModel;
+        // Find the option with the saved or default model
+        let foundOption = false;
+        for (const option of modelSelect.options) {
+          if (option.value) {
+            try {
+              const modelData = JSON.parse(option.value);
+              if (savedModel && modelData.id === savedModel) {
+                modelSelect.value = option.value;
+                foundOption = true;
+                break;
+              } else if (!savedModel && modelData.id === defaultModel) {
+                modelSelect.value = option.value;
+                foundOption = true;
+                break;
+              }
+            } catch {}
+          }
         }
 
         // Save model preference on change
         modelSelect.addEventListener('change', () => {
           if (modelSelect.value) {
-            localStorage.setItem('opencodePreferredModel', modelSelect.value);
+            try {
+              const modelData = JSON.parse(modelSelect.value);
+              localStorage.setItem('opencodePreferredModel', modelData.id);
+            } catch {
+              // Fallback for old format
+              localStorage.setItem('opencodePreferredModel', modelSelect.value);
+            }
           }
         });
       })
@@ -675,6 +806,13 @@ const html = `<!DOCTYPE html>
             }
             updateOrCreateMessage(part.messageID, resultContent, null, true); // append mode
           }
+        } else if (data.type === 'permission.updated') {
+          // Permission request
+          console.log('Permission event received:', data);
+          const permission = data.properties;
+          if (permission.sessionID === sessionId) {
+            showPermissionModal(permission);
+          }
         }
       };
 
@@ -706,6 +844,18 @@ const html = `<!DOCTYPE html>
         alert('Please select a model first');
         return;
       }
+      
+      // Parse model data (contains both id and provider)
+      let modelId, providerId;
+      try {
+        const modelData = JSON.parse(selectedModel);
+        modelId = modelData.id;
+        providerId = modelData.provider;
+      } catch {
+        // Fallback for old format
+        modelId = selectedModel;
+        providerId = null;
+      }
 
       // Add user message (already trimmed above)
       addMessage(message, 'user');
@@ -723,7 +873,8 @@ const html = `<!DOCTYPE html>
           body: JSON.stringify({
             message,
             sessionId,
-            modelId: selectedModel,
+            modelId: modelId,
+            providerId: providerId,
             agent: document.getElementById('agentSelect')?.value || 'build'
           })
         });
@@ -755,264 +906,3 @@ const html = `<!DOCTYPE html>
   </script>
 </body>
 </html>`;
-
-// Proxy server
-serve({
-  port: 3000,
-  idleTimeout: 120,  // 2 minutes timeout for long responses
-
-  async fetch(req) {
-    const url = new URL(req.url);
-
-    // Serve HTML
-    if (url.pathname === "/") {
-      return new Response(html, {
-        headers: { "Content-Type": "text/html" }
-      });
-    }
-
-    // Debug endpoint
-    if (url.pathname === "/debug") {
-      const debugInfo = {
-        providers: null,
-        agents: null,
-        sessions: null,
-        errors: []
-      };
-
-      try {
-        const providersRes = await fetch(`${OPENCODE_URL}/config/providers`);
-        debugInfo.providers = await providersRes.json();
-      } catch (e) {
-        debugInfo.errors.push(`Providers: ${e.message}`);
-      }
-
-      try {
-        const agentsRes = await fetch(`${OPENCODE_URL}/agent`);
-        debugInfo.agents = await agentsRes.json();
-      } catch (e) {
-        debugInfo.errors.push(`Agents: ${e.message}`);
-      }
-
-      try {
-        const sessionsRes = await fetch(`${OPENCODE_URL}/session`);
-        debugInfo.sessions = await sessionsRes.json();
-      } catch (e) {
-        debugInfo.errors.push(`Sessions: ${e.message}`);
-      }
-
-      return Response.json(debugInfo);
-    }
-
-    // Proxy config/providers endpoint
-    if (url.pathname === "/config/providers") {
-      const response = await fetch(`${OPENCODE_URL}/config/providers`);
-      return new Response(await response.text(), {
-        headers: { "Content-Type": "application/json" }
-      });
-    }
-
-    // Proxy agent endpoint
-    if (url.pathname === "/agent") {
-      const response = await fetch(`${OPENCODE_URL}/agent`);
-      return new Response(await response.text(), {
-        headers: { "Content-Type": "application/json" }
-      });
-    }
-
-    // History endpoint
-    if (url.pathname === "/history") {
-      const sessionId = url.searchParams.get("sessionId");
-      if (!sessionId) {
-        return new Response("Session ID required", { status: 400 });
-      }
-
-      try {
-        const response = await fetch(`${OPENCODE_URL}/session/${sessionId}/message`);
-        if (!response.ok) {
-          return new Response("Failed to load history", { status: 500 });
-        }
-
-        const messages = await response.json();
-        return Response.json(messages);
-      } catch (error) {
-        return Response.json({ error: error.message }, { status: 500 });
-      }
-    }
-
-    // SSE endpoint for streaming
-    if (url.pathname === "/stream") {
-      const sessionId = url.searchParams.get("sessionId");
-      console.log("SSE stream requested for session:", sessionId);
-      if (!sessionId) {
-        return new Response("Session ID required", { status: 400 });
-      }
-
-      // Simple SSE proxy - just forward all events for now
-      const stream = new ReadableStream({
-        async start(controller) {
-          const encoder = new TextEncoder();
-
-          // Send keepalive every 30 seconds
-          const keepalive = setInterval(() => {
-            try {
-              controller.enqueue(encoder.encode(':keepalive\\n\\n'));
-            } catch (e) {
-              // Controller closed, stop keepalive
-              clearInterval(keepalive);
-            }
-          }, 30000);
-
-          try {
-            console.log("Connecting to OpenCode SSE endpoint...");
-            const res = await fetch(`${OPENCODE_URL}/event`);
-            console.log("OpenCode SSE response status:", res.status);
-            const reader = res.body?.getReader();
-            if (!reader) {
-              clearInterval(keepalive);
-              throw new Error("No reader");
-            }
-
-            const decoder = new TextDecoder();
-            let buffer = '';
-
-            let eventCount = 0;
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) {
-                console.log("SSE stream ended");
-                break;
-              }
-
-              buffer += decoder.decode(value, { stream: true });
-              const lines = buffer.split('\n');
-
-              // Keep last incomplete line in buffer
-              buffer = lines.pop() || '';
-
-              for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                  eventCount++;
-                  if (eventCount <= 5) {
-                    console.log("SSE event", eventCount, ":", line.substring(0, 100));
-                  }
-                  try {
-                    const data = JSON.parse(line.slice(6));
-                    // Filter for this session
-                    if (data.properties?.part?.sessionID === sessionId ||
-                        data.properties?.info?.sessionID === sessionId) {
-                      controller.enqueue(encoder.encode(line + '\n\n'));
-                    }
-                  } catch (e) {
-                    // Not JSON, forward as-is if it's a heartbeat
-                    if (line === 'data: {"type":"server.connected","properties":{}}') {
-                      controller.enqueue(encoder.encode(line + '\n\n'));
-                    }
-                  }
-                }
-              }
-            }
-            clearInterval(keepalive);
-          } catch (error) {
-            console.error("SSE stream error:", error);
-            clearInterval(keepalive);
-            controller.close();
-          }
-        }
-      });
-
-      return new Response(stream, {
-        headers: {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
-          "Connection": "keep-alive"
-        }
-      });
-    }
-
-    // Handle chat endpoint
-    if (url.pathname === "/chat" && req.method === "POST") {
-      try {
-        const body = await req.json();
-        const { message, sessionId, agent, modelId } = body;
-
-        // Create or reuse session
-        let currentSessionId = sessionId;
-
-        if (!currentSessionId) {
-          // Create new session
-          const sessionRes = await fetch(`${OPENCODE_URL}/session`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" }
-          });
-
-          if (!sessionRes.ok) {
-            throw new Error("Failed to create session");
-          }
-
-          const sessionData = await sessionRes.json();
-          currentSessionId = sessionData.id;
-        }
-
-        // Get current agent/mode setting from request (default to build)
-        const currentAgent = agent || 'build';
-
-        // Use the model selected by the user, fallback to Opus 4.1
-        const currentModelId = modelId || 'claude-opus-4-1-20250805';
-
-        // Generate a message ID similar to OpenCode's format
-        // Format: msg_<timestamp_hex><random>
-        const timestamp = Date.now();
-        const timestampHex = (timestamp * 0x1000).toString(16).padStart(12, '0');
-        const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let random = '';
-        for (let i = 0; i < 14; i++) {
-          random += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-        }
-        const messageId = `msg_${timestampHex}${random}`;
-
-        // Send message to OpenCode (fire and forget - response comes via SSE)
-        fetch(`${OPENCODE_URL}/session/${currentSessionId}/message`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            providerID: "anthropic",
-            modelID: currentModelId,
-            agent: currentAgent,
-            messageID: messageId,
-            parts: [
-              {
-                type: "text",
-                text: message
-              }
-            ]
-          })
-        }).then(res => {
-          if (!res.ok) {
-            console.error("OpenCode message send failed:", res.status, "for model:", currentModelId);
-          }
-        }).catch(err => {
-          console.error("Failed to send message:", err);
-        });
-
-        // Return immediately - response will come through SSE
-        return Response.json({
-          sessionId: currentSessionId,
-          streaming: true
-        });
-
-      } catch (error) {
-        console.error("Chat error:", error);
-        return Response.json(
-          { error: error.message },
-          { status: 500 }
-        );
-      }
-    }
-
-    return new Response("Not found", { status: 404 });
-  }
-});
-
-console.log("OpenCode Chat server running on http://localhost:3000");
-console.log("Make sure OpenCode server is running on port 4096");
