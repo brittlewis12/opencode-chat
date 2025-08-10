@@ -1,5 +1,6 @@
-import { serve, file, spawn } from "bun";
+import { serve, spawn } from "bun";
 import OpenCodeClient from "./opencode-client";
+import index from "./index.html";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 const OPENCODE_URL = process.env.OPENCODE_URL || "http://localhost:4096";
@@ -93,21 +94,25 @@ opencodeClient.addListener((sessionId, state) => {
   }
 });
 
-// Proxy server with native React support
-serve({
+// Server with native Bun routing
+const server = serve({
   port: PORT,
   idleTimeout: 120, // 2 minutes timeout for long responses
 
-  // Enable browser console streaming (Bun 1.2.20 feature)
-  development: isDev ? {
-    console: true,  // Stream browser console logs to terminal
-  } : undefined,
+  // Enable browser console streaming and HMR in development
+  development: isDev
+    ? {
+        hmr: true, // Hot module reloading
+        console: true, // Stream browser console logs to terminal
+      }
+    : undefined,
 
-  async fetch(req) {
-    const url = new URL(req.url);
+  routes: {
+    // Serve the React app for all unmatched routes
+    "/*": index,
 
     // Debug endpoint
-    if (url.pathname === "/debug") {
+    "/debug": async (req) => {
       const debugInfo: {
         providers: any;
         agents: any;
@@ -142,23 +147,24 @@ serve({
       }
 
       return Response.json(debugInfo);
-    }
+    },
 
     // Proxy config endpoints
-    if (url.pathname === "/config/providers") {
+    "/config/providers": async () => {
       const response = await fetch(`${OPENCODE_URL}/config/providers`);
       return new Response(await response.text(), {
         headers: { "Content-Type": "application/json" },
       });
-    }
+    },
 
-    if (url.pathname === "/config") {
-      if (req.method === "GET") {
+    "/config": {
+      async GET() {
         const response = await fetch(`${OPENCODE_URL}/config`);
         return new Response(await response.text(), {
           headers: { "Content-Type": "application/json" },
         });
-      } else if (req.method === "PATCH") {
+      },
+      async PATCH(req) {
         // For now, we'll need to handle config updates differently
         // OpenCode doesn't expose a PATCH endpoint for config
         const body = await req.json();
@@ -169,27 +175,28 @@ serve({
           message:
             "Config updates require creating an opencode.json file. This feature is coming soon!",
         });
-      }
-    }
+      },
+    },
 
     // Proxy agent endpoint
-    if (url.pathname === "/agent") {
+    "/agent": async () => {
       const response = await fetch(`${OPENCODE_URL}/agent`);
       return new Response(await response.text(), {
         headers: { "Content-Type": "application/json" },
       });
-    }
+    },
 
     // Proxy session list endpoint
-    if (url.pathname === "/session") {
+    "/session": async () => {
       const response = await fetch(`${OPENCODE_URL}/session`);
       return new Response(await response.text(), {
         headers: { "Content-Type": "application/json" },
       });
-    }
+    },
 
     // History endpoint
-    if (url.pathname === "/history") {
+    "/history": async (req) => {
+      const url = new URL(req.url);
       const sessionId = url.searchParams.get("sessionId");
       if (!sessionId) {
         return new Response("Session ID required", { status: 400 });
@@ -208,17 +215,18 @@ serve({
       } catch (error) {
         return Response.json({ error: error.message }, { status: 500 });
       }
-    }
+    },
 
     // Get declarative session state
-    if (url.pathname.match(/^\/session\/([^\/]+)\/state$/)) {
-      const sessionId = url.pathname.split("/")[2];
+    "/session/:sessionId/state": async (req) => {
+      const sessionId = req.params.sessionId;
       const state = await opencodeClient.getSessionState(sessionId);
       return Response.json(state);
-    }
+    },
 
     // SSE endpoint for streaming state updates to browser
-    if (url.pathname === "/stream") {
+    "/stream": async (req) => {
+      const url = new URL(req.url);
       const sessionId = url.searchParams.get("sessionId");
       console.log("Browser SSE stream requested for session:", sessionId);
       if (!sessionId) {
@@ -241,7 +249,7 @@ serve({
             encoder.encode(`data: ${JSON.stringify({ sessionId, state })}\n\n`),
           );
 
-          // Send keepalive every 30 seconds (was incorrectly set to 10 seconds)
+          // Send keepalive every 30 seconds
           const keepalive = setInterval(() => {
             try {
               controller.enqueue(encoder.encode(":keepalive\n\n"));
@@ -272,167 +280,105 @@ serve({
           Connection: "keep-alive",
         },
       });
-    }
+    },
 
     // Handle permission queries
-    if (
-      req.method === "GET" &&
-      url.pathname.match(/^\/session\/[^\/]+\/permissions$/)
-    ) {
-      const response = await fetch(`${OPENCODE_URL}${url.pathname}`);
-      return new Response(await response.text(), {
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    "/session/:sessionId/permissions": {
+      async GET(req) {
+        const sessionId = req.params.sessionId;
+        const response = await fetch(
+          `${OPENCODE_URL}/session/${sessionId}/permissions`,
+        );
+        return new Response(await response.text(), {
+          headers: { "Content-Type": "application/json" },
+        });
+      },
+    },
 
     // Handle permission responses
-    if (
-      req.method === "POST" &&
-      url.pathname.match(/^\/session\/([^\/]+)\/permissions\/([^\/]+)$/)
-    ) {
-      const matches = url.pathname.match(
-        /^\/session\/([^\/]+)\/permissions\/([^\/]+)$/,
-      );
-      const sessionId = matches![1];
-      const permissionId = matches![2];
-
-      try {
-        const body = await req.json();
-        await opencodeClient.respondToPermission(
-          sessionId,
-          permissionId,
-          body.response,
-        );
-        return Response.json({ success: true });
-      } catch (error) {
-        console.error("Permission response error:", error);
-        return new Response(error.message, { status: 500 });
-      }
-    }
+    "/session/:sessionId/permissions/:permissionId": {
+      async POST(req) {
+        const { sessionId, permissionId } = req.params;
+        try {
+          const body = await req.json();
+          await opencodeClient.respondToPermission(
+            sessionId,
+            permissionId,
+            body.response,
+          );
+          return Response.json({ success: true });
+        } catch (error) {
+          console.error("Permission response error:", error);
+          return new Response(error.message, { status: 500 });
+        }
+      },
+    },
 
     // Handle chat endpoint
-    if (url.pathname === "/chat" && req.method === "POST") {
-      try {
-        const body = await req.json();
-        const { message, sessionId, agent, modelId, providerId } = body;
+    "/chat": {
+      async POST(req) {
+        try {
+          const body = await req.json();
+          const { message, sessionId, agent, modelId, providerId } = body;
 
-        // Create or reuse session
-        let currentSessionId = sessionId;
+          // Create or reuse session
+          let currentSessionId = sessionId;
 
-        if (!currentSessionId) {
-          // Create new session
-          const sessionRes = await fetch(`${OPENCODE_URL}/session`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-          });
+          if (!currentSessionId) {
+            // Create new session
+            const sessionRes = await fetch(`${OPENCODE_URL}/session`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+            });
 
-          if (!sessionRes.ok) {
-            throw new Error("Failed to create session");
-          }
-
-          const sessionData = await sessionRes.json();
-          currentSessionId = sessionData.id;
-        }
-
-        // Get current agent/mode setting from request (default to build)
-        const currentAgent = agent || "build";
-
-        // Use the model selected by the user, fallback to Opus 4.1
-        const currentModelId = modelId || "claude-opus-4-1-20250805";
-        const currentProviderId = providerId || "anthropic"; // Default to anthropic for Opus
-        console.log(
-          "Sending message with model:",
-          currentModelId,
-          "provider:",
-          currentProviderId,
-        );
-
-        // Send message through OpenCodeClient (do not await full run)
-        opencodeClient
-          .sendMessage(
-            currentSessionId,
-            message,
-            currentModelId,
-            currentProviderId,
-            currentAgent,
-          )
-          .catch((err) => console.error("sendMessage error:", err));
-
-        // Return immediately - progress will stream via SSE/state
-        return Response.json({
-          sessionId: currentSessionId,
-          streaming: true,
-        });
-      } catch (error) {
-        console.error("Chat error:", error);
-        return Response.json({ error: error.message }, { status: 500 });
-      }
-    }
-
-    // Serve index.html for root
-    if (url.pathname === "/" || url.pathname === "/index.html") {
-      const indexFile = file("./src/index.html");
-      if (await indexFile.exists()) {
-        return new Response(indexFile, {
-          headers: { "Content-Type": "text/html" }
-        });
-      }
-    }
-    
-    // Serve static files with automatic JSX/TSX transpilation
-    const filePath = `./src${url.pathname}`;
-    const staticFile = file(filePath);
-    
-    if (await staticFile.exists()) {
-      const ext = url.pathname.split('.').pop();
-      
-      // Transpile JS/JSX/TS/TSX files on the fly
-      if (['js', 'jsx', 'ts', 'tsx'].includes(ext || '')) {
-        const transpiler = new Bun.Transpiler({
-          loader: ext as any,
-          jsx: "react",
-          tsconfig: {
-            compilerOptions: {
-              jsx: "react",
-              jsxFactory: "React.createElement",
-              jsxFragmentFactory: "React.Fragment",
+            if (!sessionRes.ok) {
+              throw new Error("Failed to create session");
             }
-          }
-        });
-        
-        const code = await staticFile.text();
-        const transpiled = await transpiler.transform(code);
-        
-        return new Response(transpiled, {
-          headers: { 
-            "Content-Type": "application/javascript",
-            "Cache-Control": isDev ? "no-cache" : "public, max-age=3600"
-          }
-        });
-      }
-      
-      // Serve other static files
-      const contentType = {
-        'css': 'text/css',
-        'html': 'text/html',
-        'json': 'application/json',
-        'svg': 'image/svg+xml',
-        'png': 'image/png',
-        'jpg': 'image/jpeg',
-        'jpeg': 'image/jpeg',
-      }[ext || ''] || 'text/plain';
-      
-      return new Response(staticFile, {
-        headers: { "Content-Type": contentType }
-      });
-    }
 
-    console.log(`Unhandled request: ${req.method} ${url.pathname}`);
-    return new Response("Not found", { status: 404 });
+            const sessionData = await sessionRes.json();
+            currentSessionId = sessionData.id;
+          }
+
+          // Get current agent/mode setting from request (default to build)
+          const currentAgent = agent || "build";
+
+          // Use the model selected by the user, fallback to Opus 4.1
+          const currentModelId = modelId || "claude-opus-4-1-20250805";
+          const currentProviderId = providerId || "anthropic"; // Default to anthropic for Opus
+          console.log(
+            "Sending message with model:",
+            currentModelId,
+            "provider:",
+            currentProviderId,
+          );
+
+          // Send message through OpenCodeClient (do not await full run)
+          opencodeClient
+            .sendMessage(
+              currentSessionId,
+              message,
+              currentModelId,
+              currentProviderId,
+              currentAgent,
+            )
+            .catch((err) => console.error("sendMessage error:", err));
+
+          // Return immediately - progress will stream via SSE/state
+          return Response.json({
+            sessionId: currentSessionId,
+            streaming: true,
+          });
+        } catch (error) {
+          console.error("Chat error:", error);
+          return Response.json({ error: error.message }, { status: 500 });
+        }
+      },
+    },
   },
 });
 
 console.log(`OpenCode Chat server running on http://localhost:${PORT}`);
 if (isDev) {
   console.log("Browser console logs will be streamed to this terminal");
+  console.log("Hot module reloading enabled");
 }

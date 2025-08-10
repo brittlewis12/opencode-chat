@@ -6,7 +6,8 @@
   "scripts": {
     "start": "NODE_ENV=production bun run src/server.ts",
     "dev": "NODE_ENV=development bun --watch src/server.ts",
-    "check": "bunx tsc --noEmit"
+    "check": "bunx tsc --noEmit",
+    "format": "bunx prettier --write 'src/**/*.{ts,tsx,html,css,json}'"
   },
   "devDependencies": {
     "@types/bun": "1.2.20"
