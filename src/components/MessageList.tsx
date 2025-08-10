@@ -4,7 +4,7 @@ import { marked } from "marked";
 import DOMPurify from "dompurify";
 import MessageContent from "./MessageContent";
 import InlinePermission from "./InlinePermission";
-import type { PermissionInfo } from "./PermissionRequest";
+import type { PermissionInfo } from "./InlinePermission";
 
 interface MessageListProps {
   messages: Message[];

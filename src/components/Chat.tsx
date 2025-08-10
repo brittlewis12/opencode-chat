@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import MessageList from "./MessageList";
-import PermissionRequest, { type PermissionInfo } from "./PermissionRequest";
+import { type PermissionInfo } from "./InlinePermission";
 import ConfigManager from "./ConfigManager";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
@@ -568,25 +568,6 @@ export default function Chat({ sessionId: propSessionId }: ChatProps) {
 
   return (
     <>
-      {/* Permission modal only when not tied to a visible tool call */}
-      {(() => {
-        if (!pendingPermission) return null;
-        const isInline =
-          !!pendingPermission.callID &&
-          (serverState.messages || []).some((m: any) =>
-            (m.parts || []).some(
-              (p: any) =>
-                p.type === "tool" && p.callID === pendingPermission.callID,
-            ),
-          );
-        if (isInline) return null;
-        return (
-          <PermissionRequest
-            permission={pendingPermission}
-            onRespond={handlePermissionResponse}
-          />
-        );
-      })()}
       {showConfig && <ConfigManager onClose={() => setShowConfig(false)} />}
       <MessageList
         messages={serverState.messages || []}
