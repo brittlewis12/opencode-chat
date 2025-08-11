@@ -1,4 +1,5 @@
 import { serve, spawn } from "bun";
+import { homedir } from "os";
 import OpenCodeClient from "./opencode-client";
 import index from "./index.html";
 
@@ -110,6 +111,11 @@ const server = serve({
   routes: {
     // Serve the React app for all unmatched routes
     "/*": index,
+
+    // Home directory endpoint
+    "/home": () => {
+      return Response.json({ home: homedir() });
+    },
 
     // Debug endpoint
     "/debug": async (req) => {

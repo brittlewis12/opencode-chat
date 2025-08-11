@@ -60,6 +60,24 @@ export default function Chat({
   });
   const [projectCwd, setProjectCwd] = useState<string | null>(null);
   const [projectRoot, setProjectRoot] = useState<string | null>(null);
+  const [homeDir, setHomeDir] = useState<string | null>(null);
+
+  // Fetch home directory once
+  useEffect(() => {
+    fetch("/home")
+      .then((res) => res.json())
+      .then((data) => setHomeDir(data.home))
+      .catch(() => {});
+  }, []);
+
+  // Helper to format path with ~ for home
+  const formatPath = (path: string) => {
+    if (!path) return path;
+    if (homeDir && path.startsWith(homeDir)) {
+      return "~" + path.slice(homeDir.length);
+    }
+    return path;
+  };
 
   // Fetch available models
   const { data: providers } = useQuery({
@@ -246,6 +264,22 @@ export default function Chat({
             }
           }
         }
+
+        // Extract project paths from last assistant message
+        const msgs = Array.isArray(state?.messages) ? state.messages : [];
+        const lastAssistant = [...msgs]
+          .reverse()
+          .find((m: any) => m?.info?.role === "assistant");
+        if (lastAssistant?.info?.path) {
+          if (lastAssistant.info.path.cwd) {
+            setProjectCwd(formatPath(lastAssistant.info.path.cwd));
+          }
+          if (lastAssistant.info.path.root) {
+            const formattedRoot = formatPath(lastAssistant.info.path.root);
+            setProjectRoot(formattedRoot);
+            onProjectPathChange?.(formattedRoot);
+          }
+        }
       })
       .catch((err) => console.error("Failed to fetch initial state:", err));
   }, [sessionId]);
@@ -305,15 +339,12 @@ export default function Chat({
             // Extract project paths from assistant message
             if (lastAssistant?.info?.path) {
               if (lastAssistant.info.path.cwd) {
-                const cwdName =
-                  lastAssistant.info.path.cwd.split("/").pop() || "unknown";
-                setProjectCwd(cwdName);
+                setProjectCwd(formatPath(lastAssistant.info.path.cwd));
               }
               if (lastAssistant.info.path.root) {
-                const rootName =
-                  lastAssistant.info.path.root.split("/").pop() || "unknown";
-                setProjectRoot(rootName);
-                onProjectPathChange?.(rootName);
+                const formattedRoot = formatPath(lastAssistant.info.path.root);
+                setProjectRoot(formattedRoot);
+                onProjectPathChange?.(formattedRoot);
               }
             }
 
@@ -443,6 +474,19 @@ export default function Chat({
           const lastAssistant = [...msgs]
             .reverse()
             .find((m: any) => m?.info?.role === "assistant");
+
+          // Extract project paths from assistant message
+          if (lastAssistant?.info?.path) {
+            if (lastAssistant.info.path.cwd) {
+              setProjectCwd(formatPath(lastAssistant.info.path.cwd));
+            }
+            if (lastAssistant.info.path.root) {
+              const formattedRoot = formatPath(lastAssistant.info.path.root);
+              setProjectRoot(formattedRoot);
+              onProjectPathChange?.(formattedRoot);
+            }
+          }
+
           if (lastAssistant?.info?.tokens) {
             const total =
               (lastAssistant.info.tokens.input || 0) +

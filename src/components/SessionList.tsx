@@ -12,6 +12,7 @@ interface Session {
   messageCount?: number;
   lastModelId?: string;
   lastProviderId?: string;
+  projectPath?: string;
 }
 
 interface SessionListProps {
@@ -40,7 +41,25 @@ export default function SessionList({
   onClose,
 }: SessionListProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [homeDir, setHomeDir] = useState<string | null>(null);
   const queryClient = useQueryClient();
+
+  // Fetch home directory once
+  React.useEffect(() => {
+    fetch("/home")
+      .then((res) => res.json())
+      .then((data) => setHomeDir(data.home))
+      .catch(() => {});
+  }, []);
+
+  // Helper to format path with ~ for home
+  const formatPath = (path: string) => {
+    if (!path) return path;
+    if (homeDir && path.startsWith(homeDir)) {
+      return "~" + path.slice(homeDir.length);
+    }
+    return path;
+  };
   const {
     data: sessions,
     isLoading,
@@ -67,11 +86,18 @@ export default function SessionList({
                 .reverse()
                 .find((m: any) => m?.info?.role === "assistant");
 
+              // Extract project path
+              let projectPath = null;
+              if (lastAssistant?.info?.path?.root) {
+                projectPath = formatPath(lastAssistant.info.path.root);
+              }
+
               return {
                 ...session,
                 messageCount: messages.length,
                 lastModelId: lastAssistant?.info?.modelID,
                 lastProviderId: lastAssistant?.info?.providerID,
+                projectPath,
               };
             }
           } catch {
@@ -161,6 +187,11 @@ export default function SessionList({
                   <div className="font-medium text-gray-800 dark:text-gray-100">
                     {session.title || `Session ${session.id.slice(0, 8)}`}
                   </div>
+                  {session.projectPath && (
+                    <div className="text-xs text-gray-600 dark:text-gray-500">
+                      {session.projectPath}
+                    </div>
+                  )}
                   <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <span>{relativeTime}</span>

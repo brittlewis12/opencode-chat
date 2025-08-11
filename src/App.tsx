@@ -22,7 +22,6 @@ export default function App() {
   }, [sessionId]); // Re-fetch when sessionId changes
 
   const currentSession = sessions.find((s) => s.id === sessionId);
-  console.log("Current session:", currentSession, "sessionId:", sessionId);
 
   const handleNewChat = () => {
     localStorage.removeItem("opencodeSessionId");
@@ -46,15 +45,19 @@ export default function App() {
             Sessions
           </button>
           <div className="text-center flex flex-col">
-            <span className="font-semibold text-lg">OpenCode Chat</span>
-            {currentSession && (
-              <span
-                className="text-xs text-white/70 mt-0.5"
-                title={`OpenCode v${currentSession.version}`}
-              >
-                {currentSession.title || "Untitled Session"}
-                {projectRoot && ` • ${projectRoot}`}
-              </span>
+            {currentSession ? (
+              <>
+                <span className="font-semibold text-lg">
+                  {currentSession.title || "Untitled Session"}
+                </span>
+                {projectRoot && (
+                  <span className="text-xs text-white/70 mt-0.5">
+                    {projectRoot}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="font-semibold text-lg">New Chat</span>
             )}
           </div>
           <button
@@ -77,7 +80,7 @@ export default function App() {
       </div>
       {currentSession && (
         <div className="text-center text-xs text-slate-600 dark:text-slate-500 mt-2">
-          OpenCode v{currentSession.version}
+          OpenCode Chat • OpenCode v{currentSession.version}
         </div>
       )}
     </div>
