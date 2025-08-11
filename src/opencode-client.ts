@@ -89,7 +89,7 @@ class OpenCodeClient {
             if (!dataPayload) continue;
             try {
               const data = JSON.parse(dataPayload);
-              console.log('[OpenCode Event]', data.type);
+              console.log("[OpenCode Event]", data.type);
               // Buffer events if session is in buffering mode
               const sessionId = this.extractSessionId(data);
               if (sessionId && this.bufferingSessions.has(sessionId)) {
@@ -97,7 +97,9 @@ class OpenCodeClient {
                   this.eventBuffer.set(sessionId, []);
                 }
                 this.eventBuffer.get(sessionId)!.push(data);
-                console.log(`Buffered event for session ${sessionId}: ${data.type}`);
+                console.log(
+                  `Buffered event for session ${sessionId}: ${data.type}`,
+                );
                 // Don't process the event now, it will be flushed later
               } else {
                 this.handleEvent(data);
@@ -169,7 +171,7 @@ class OpenCodeClient {
         const removed = state.messages.splice(idx, 1)[0];
         // Cleanup any tools linked to that message
         for (const [callID, entry] of Object.entries(state.toolsByCall)) {
-          if (entry.messageID === removed.info!.id)
+          if (entry.messageID === removed?.info?.id)
             delete state.toolsByCall[callID];
         }
         updated = true;
@@ -282,7 +284,9 @@ class OpenCodeClient {
     // Flush any buffered events
     const buffered = this.eventBuffer.get(sessionId) || [];
     if (buffered.length > 0) {
-      console.log(`Flushing ${buffered.length} buffered events for session ${sessionId}`);
+      console.log(
+        `Flushing ${buffered.length} buffered events for session ${sessionId}`,
+      );
       for (const event of buffered) {
         this.handleEvent(event);
       }

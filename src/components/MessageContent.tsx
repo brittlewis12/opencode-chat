@@ -2,9 +2,6 @@ import React from "react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import CopyButton from "./CopyButton";
-import type { PermissionInfo } from "./InlinePermission";
-import InlinePermission from "./InlinePermission";
-import type { Message } from "../types";
 
 interface MessagePart {
   type: "text" | "code" | "tool";
@@ -89,7 +86,7 @@ function parseMessageContent(content: string): MessagePart[] {
       let code = "";
       i++;
 
-      while (i < lines.length && lines[i] && !lines[i]!.startsWith("```")) {
+      while (i < lines.length && !lines[i]!.startsWith("```")) {
         if (code) code += "\n";
         code += lines[i];
         i++;
@@ -161,20 +158,14 @@ function ToolSpinner() {
 export default function MessageContent({
   content,
   isStreaming = false,
-  permission = null,
-  onRespondPermission = null,
 }: {
   content: string;
   isStreaming?: boolean;
-  permission: PermissionInfo | null;
-  onRespondPermission:
-    | ((response: "once" | "always" | "reject") => void)
-    | null;
 }) {
   const parsedParts = parseMessageContent(content);
 
   return (
-    <div className="message-content">
+    <div className="message-content text-base lg:text-[1.05rem] xl:text-[1.1rem]">
       {parsedParts.map((part, index) => {
         if (part.type === "text") {
           const html = marked.parse(part.content) as string;
@@ -190,7 +181,7 @@ export default function MessageContent({
               <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <CopyButton text={part.content} />
               </div>
-              <pre className="overflow-x-auto p-3 bg-gray-100 dark:bg-gray-800 rounded">
+              <pre className="overflow-x-auto p-3 lg:p-4 bg-gray-100 dark:bg-gray-800 rounded text-sm lg:text-[0.95rem] xl:text-base">
                 <code className={`language-${part.language}`}>
                   {part.content}
                 </code>
@@ -204,86 +195,70 @@ export default function MessageContent({
             part.status === "running" || part.status === "pending";
 
           return (
-            <details
-              key={index}
-              open
-              className="my-2 p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800"
-            >
-              <summary className="text-sm font-mono text-indigo-600 dark:text-indigo-400 cursor-pointer flex items-center gap-2">
-                <span>› {part.toolName}</span>
-                {isRunning && <ToolSpinner />}
-              </summary>
+            <div key={index}>
+              <details
+                open
+                className="my-2 p-3 lg:p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800"
+              >
+                <summary className="text-sm font-mono text-indigo-600 dark:text-indigo-400 cursor-pointer flex items-center gap-2">
+                  <span>› {part.toolName}</span>
+                  {isRunning && <ToolSpinner />}
+                </summary>
 
-              {onRespondPermission &&
-                permission && //? (
-                // permission.pattern &&
-                part.command &&
-                part.command.includes(permission.title.trim()) && (
-                  // part.callID === permission.callID ? (
-                  <>
-                    {console.log(permission.title)}
-                    <div className="mt-2">
-                      <InlinePermission
-                        permission={permission}
-                        onRespond={onRespondPermission}
-                      />
-                    </div>
-                  </>
+                {part.command && (
+                  <div className="relative group mt-2">
+                    {!isRunning && (
+                      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <CopyButton text={part.command} />
+                      </div>
+                    )}
+                    <pre className="overflow-x-auto p-3 lg:p-4 bg-gray-900 text-gray-100 rounded text-sm lg:text-[0.95rem] xl:text-base">
+                      <code>$ {part.command}</code>
+                    </pre>
+                    {part.description && (
+                      <div className="text-xs text-gray-500 italic mt-1">
+                        {part.description}
+                      </div>
+                    )}
+                  </div>
                 )}
 
-              {part.command && (
-                <div className="relative group mt-2">
-                  {!isRunning && (
+                {isRunning && !part.output && (
+                  <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded">
+                    <div className="flex items-center gap-3">
+                      <div className="flex gap-1">
+                        <div
+                          className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
+                          style={{ animationDelay: "0ms" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
+                          style={{ animationDelay: "150ms" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
+                          style={{ animationDelay: "300ms" }}
+                        ></div>
+                      </div>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Executing command...
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {part.output && (
+                  <div className="relative group mt-2">
                     <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <CopyButton text={part.command} />
+                      <CopyButton text={part.output} />
                     </div>
-                  )}
-                  <pre className="overflow-x-auto p-3 bg-gray-900 text-gray-100 rounded">
-                    <code>$ {part.command}</code>
-                  </pre>
-                  {part.description && (
-                    <div className="text-xs text-gray-500 italic mt-1">
-                      {part.description}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {isRunning && !part.output && (
-                <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded">
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-1">
-                      <div
-                        className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
-                        style={{ animationDelay: "0ms" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
-                        style={{ animationDelay: "150ms" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
-                        style={{ animationDelay: "300ms" }}
-                      ></div>
-                    </div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Executing command...
-                    </span>
+                    <pre className="overflow-x-auto p-3 lg:p-4 bg-gray-100 dark:bg-gray-800 rounded text-sm lg:text-[0.95rem]">
+                      <code>{part.output}</code>
+                    </pre>
                   </div>
-                </div>
-              )}
-
-              {part.output && (
-                <div className="relative group mt-2">
-                  <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <CopyButton text={part.output} />
-                  </div>
-                  <pre className="overflow-x-auto p-3 bg-gray-100 dark:bg-gray-800 rounded text-sm">
-                    <code>{part.output}</code>
-                  </pre>
-                </div>
-              )}
-            </details>
+                )}
+              </details>
+            </div>
           );
         }
 

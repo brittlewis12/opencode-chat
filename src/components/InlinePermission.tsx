@@ -19,20 +19,24 @@ interface InlinePermissionProps {
   onRespond: (response: "once" | "always" | "reject") => void;
 }
 
-export default function InlinePermission({
+const InlinePermission: React.FC<InlinePermissionProps> = ({
   permission,
   onRespond,
-}: InlinePermissionProps) {
+}) => {
+  console.log("Rendering inline permission:", permission);
+  React.useEffect(() => {
+    console.log("InlinePermission mounted with permission:", permission);
+  }, [permission]);
+
   return (
-    <div className="my-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 rounded">
+    <div
+      key={permission.id}
+      className="my-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 rounded"
+    >
       <div className="flex flex-col gap-2">
         <div className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
           🔐 Permission Required
         </div>
-        {/*{JSON.stringify(permission, null, 2)}*/}
-        {/*<div className="text-sm text-gray-700 dark:text-gray-300">
-          {permission.title}
-        </div>*/}
         {permission.pattern && (
           <div className="text-xs text-gray-600 dark:text-gray-400 font-mono">
             Pattern: {permission.pattern}
@@ -61,4 +65,6 @@ export default function InlinePermission({
       </div>
     </div>
   );
-}
+};
+
+export default InlinePermission;

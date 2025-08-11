@@ -35,7 +35,10 @@ export default function ConfigManager({ onClose }: { onClose: () => void }) {
     if (config?.permission) {
       setEditMode(config.permission.edit || "ask");
       if (typeof config.permission.bash === "string") {
-        setBashMode(config.permission.bash);
+        const mode = ["ask", "allow", "deny"].includes(config.permission.bash)
+          ? config.permission.bash
+          : "ask";
+        setBashMode(mode as "ask" | "allow" | "deny");
         setBashWildcard(true);
       } else if (config.permission.bash) {
         setBashWildcard(false);
@@ -110,9 +113,9 @@ export default function ConfigManager({ onClose }: { onClose: () => void }) {
   ) => {
     const updated = [...customBashRules];
     if (field === "pattern") {
-      updated[index].pattern = value;
+      updated[index]!.pattern = value;
     } else {
-      updated[index].mode = value as "ask" | "allow" | "deny";
+      updated[index]!.mode = value as "ask" | "allow" | "deny";
     }
     setCustomBashRules(updated);
   };

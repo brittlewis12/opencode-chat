@@ -10,6 +10,8 @@ interface Session {
   };
   version?: string;
   messageCount?: number;
+  lastModelId?: string;
+  lastProviderId?: string;
 }
 
 interface SessionListProps {
@@ -51,14 +53,26 @@ export default function SessionList({
       if (!res.ok) throw new Error("Failed to fetch sessions");
       const sessionList = await res.json();
 
-      // Fetch message counts for each session
+      // Fetch message counts and last model info for each session
       const sessionsWithCounts = await Promise.all(
         sessionList.map(async (session: Session) => {
           try {
-            const msgRes = await fetch(`/history?sessionId=${session.id}`);
-            if (msgRes.ok) {
-              const messages = await msgRes.json();
-              return { ...session, messageCount: messages.length };
+            const stateRes = await fetch(`/session/${session.id}/state`);
+            if (stateRes.ok) {
+              const state = await stateRes.json();
+              const messages = state.messages || [];
+
+              // Find last assistant message to get model info
+              const lastAssistant = [...messages]
+                .reverse()
+                .find((m: any) => m?.info?.role === "assistant");
+
+              return {
+                ...session,
+                messageCount: messages.length,
+                lastModelId: lastAssistant?.info?.modelID,
+                lastProviderId: lastAssistant?.info?.providerID,
+              };
             }
           } catch {
             // Ignore errors for individual sessions
@@ -148,7 +162,19 @@ export default function SessionList({
                     {session.title || `Session ${session.id.slice(0, 8)}`}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex justify-between items-center">
-                    <span>{relativeTime}</span>
+                    <div className="flex items-center gap-2">
+                      <span>{relativeTime}</span>
+                      {session.version && (
+                        <span className="text-xs text-gray-400">
+                          v{session.version}
+                        </span>
+                      )}
+                      {session.lastModelId && (
+                        <span className="text-xs text-blue-600 dark:text-blue-400">
+                          {session.lastModelId}
+                        </span>
+                      )}
+                    </div>
                     {session.messageCount !== undefined && (
                       <span className="text-xs bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded-full">
                         {session.messageCount}{" "}
@@ -160,27 +186,41 @@ export default function SessionList({
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();
-                    if (confirm(`Delete session "${session.title || `Session ${session.id.slice(0, 8)}`}"?`)) {
+                    if (
+                      confirm(
+                        `Delete session "${session.title || `Session ${session.id.slice(0, 8)}`}"?`,
+                      )
+                    ) {
                       try {
                         const res = await fetch(`/session/${session.id}`, {
-                          method: 'DELETE'
+                          method: "DELETE",
                         });
                         if (res.ok) {
                           refetch();
                           if (session.id === currentSessionId) {
-                            onSelectSession(''); // Clear current session if deleted
+                            onSelectSession(""); // Clear current session if deleted
                           }
                         }
                       } catch (err) {
-                        console.error('Failed to delete session:', err);
+                        console.error("Failed to delete session:", err);
                       }
                     }
                   }}
                   className="px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded mr-2"
                   title="Delete session"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
                   </svg>
                 </button>
               </div>

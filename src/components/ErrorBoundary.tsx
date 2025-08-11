@@ -13,11 +13,11 @@ export default class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, message: error?.message || String(error) };
   }
 
-  componentDidCatch(error: any, info: any) {
+  override componentDidCatch(error: any, info: any) {
     console.error("UI Error:", error, info);
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="p-4 text-sm text-red-600 dark:text-red-400">

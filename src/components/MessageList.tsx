@@ -22,6 +22,14 @@ interface Message {
       created?: number;
     };
     sessionID?: string;
+    modelID?: string;
+    providerID?: string;
+    tokens?: {
+      input?: number;
+      output?: number;
+      reasoning?: number;
+    };
+    cost?: number;
   };
   parts?: Array<{
     type: string;
@@ -32,6 +40,24 @@ interface Message {
     error?: string;
     synthetic?: boolean;
     callID?: string; // For tool calls
+    metadata?: {
+      stdout?: string;
+      stderr?: string;
+      exit?: number;
+      description?: string;
+    };
+    tool?: string; // tool name
+    state?: {
+      status: "pending" | "running" | "completed" | "failed";
+      input: any;
+      output?: string;
+      metadata?: {
+        stdout?: string;
+        stderr?: string;
+        exit?: number;
+        description?: string;
+      };
+    };
   }>;
 }
 
@@ -50,7 +76,7 @@ export default function MessageList({
 
   if (!messages || messages.length === 0) {
     return (
-      <div className="flex-1 overflow-y-auto p-4 min-h-0">
+      <div className="flex-1 overflow-y-auto px-4 lg:px-8 xl:px-12 py-4 min-h-0">
         <div className="text-center text-gray-500 dark:text-gray-400 italic">
           Welcome! Type a message to start chatting with OpenCode.
         </div>
@@ -66,7 +92,7 @@ export default function MessageList({
   });
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 min-h-0">
+    <div className="flex-1 overflow-y-auto px-4 lg:px-8 xl:px-12 py-4 min-h-0">
       {sortedMessages.map((msg, msgIndex) => {
         const timestamp = msg.info?.time?.created;
         const time = timestamp ? new Date(timestamp) : new Date();
@@ -84,7 +110,7 @@ export default function MessageList({
             <div key={msg.info.id} className="flex flex-col mb-4">
               <div className="flex justify-end">
                 <div
-                  className="max-w-[85%] px-4 py-2 rounded-lg text-white"
+                  className="max-w-[90%] sm:max-w-[70%] lg:max-w-[600px] px-4 py-2 rounded-lg text-white"
                   style={{
                     background: "linear-gradient(to right, #9333ea, #3b82f6)",
                   }}
@@ -116,46 +142,80 @@ export default function MessageList({
               if (part.output) {
                 const output = part.output.substring(0, 1000);
                 const truncated = part.output.length > 1000 ? "..." : "";
-                fullContent += "```\n" + output + truncated + "\n```\n";
+                fullContent +=
+                  "```\n" +
+                  output.replaceAll("```", "\\`\\`\\`") +
+                  truncated +
+                  "\n```\n";
               } else if (part.error) {
                 fullContent += "❌ Error: " + part.error + "\n";
               }
-            } else if (part.type === "tool" && (part as any).state) {
-              // OpenCode's tool format
-              const tool = part as any;
-              const isRunning =
-                tool.state.status === "running" ||
-                tool.state.status === "pending";
+            } else if (part.type === "tool" && part.state) {
+              // const isRunning =
+              //   part.state.status === "running" ||
+              //   part.state.status === "pending";
               fullContent +=
                 '\n\n<details open data-tool-status="' +
-                tool.state.status +
+                part.state.status +
                 '">\n<summary class="text-sm font-mono text-indigo-600 dark:text-indigo-400">› ' +
-                tool.tool +
+                part.tool +
                 "</summary>\n\n";
 
-              if (tool.state.input) {
+              if (part.state.input) {
                 // Special formatting for bash commands
-                if (tool.tool === "bash" && tool.state.input.command) {
+                if (part.tool === "bash" && part.state.input.command) {
                   fullContent +=
-                    "```bash\n$ " + tool.state.input.command + "\n```\n\n";
-                  if (tool.state.input.description) {
+                    "```bash\n$ " + part.state.input.command + "\n```\n\n";
+                  if (part.state.input.description) {
                     fullContent +=
                       '<span class="text-xs text-gray-500 italic">' +
-                      tool.state.input.description +
+                      part.state.input.description +
                       "</span>\n\n";
                   }
                 } else {
                   fullContent +=
                     '<span class="text-xs text-gray-500">input:</span>\n```json\n';
                   fullContent +=
-                    JSON.stringify(tool.state.input, null, 2) + "\n";
+                    JSON.stringify(part.state.input, null, 2) + "\n";
                   fullContent += "```\n\n";
                 }
               }
 
-              if (tool.state.output) {
+              if (part.state.metadata?.stdout || part.state.metadata?.stderr) {
+                // Try metadata fields
+                if (part.state.metadata.stdout) {
+                  fullContent += "```\n";
+                  if (part.state.metadata.stdout.includes("```")) {
+                    // debugger;
+                  }
+                  fullContent +=
+                    part.state.metadata.stdout.replaceAll("```", "\\`\\`\\`") +
+                    "\n";
+                  fullContent += "```\n\n";
+                }
+                if (
+                  part.state.metadata.stderr &&
+                  part.state.metadata.stderr.trim()
+                ) {
+                  fullContent +=
+                    '<span class="text-xs text-red-500">stderr:</span>\n```\n';
+                  fullContent +=
+                    part.state.metadata.stderr.replaceAll("```", "\\`\\`\\`") +
+                    "\n";
+                  fullContent += "```\n\n";
+                }
+                if (
+                  part.state.metadata.exit !== undefined &&
+                  part.state.metadata.exit !== 0
+                ) {
+                  fullContent +=
+                    '<span class="text-xs text-red-500">exit code: ' +
+                    part.state.metadata.exit +
+                    "</span>\n\n";
+                }
+              } else if (part.state.output) {
                 // Parse stdout/stderr tags if present
-                const output = tool.state.output;
+                const output = part.state.output;
                 const stdoutMatch = output.match(
                   /<stdout>\n?([\s\S]*?)\n?<\/stdout>/,
                 );
@@ -164,49 +224,25 @@ export default function MessageList({
                 );
 
                 if (stdoutMatch || stderrMatch) {
-                  if (stdoutMatch && stdoutMatch[1].trim()) {
+                  if (stdoutMatch && stdoutMatch[1]?.trim()) {
                     fullContent += "```\n";
-                    fullContent += stdoutMatch[1] + "\n";
+                    fullContent +=
+                      stdoutMatch[1].trim().replaceAll("```", "\\`\\`\\`") +
+                      "\n";
                     fullContent += "```\n\n";
                   }
-                  if (stderrMatch && stderrMatch[1].trim()) {
+                  if (stderrMatch && stderrMatch[1]?.trim()) {
                     fullContent +=
                       '<span class="text-xs text-red-500">stderr:</span>\n```\n';
-                    fullContent += stderrMatch[1] + "\n";
-                    fullContent += "```\n\n";
-                  }
-                } else if (
-                  tool.state.metadata?.stdout ||
-                  tool.state.metadata?.stderr
-                ) {
-                  // Try metadata fields
-                  if (tool.state.metadata.stdout) {
-                    fullContent += "```\n";
-                    fullContent += tool.state.metadata.stdout + "\n";
-                    fullContent += "```\n\n";
-                  }
-                  if (
-                    tool.state.metadata.stderr &&
-                    tool.state.metadata.stderr.trim()
-                  ) {
                     fullContent +=
-                      '<span class="text-xs text-red-500">stderr:</span>\n```\n';
-                    fullContent += tool.state.metadata.stderr + "\n";
+                      stderrMatch[1].trim().replaceAll("```", "\\`\\`\\`") +
+                      "\n";
                     fullContent += "```\n\n";
-                  }
-                  if (
-                    tool.state.metadata.exit !== undefined &&
-                    tool.state.metadata.exit !== 0
-                  ) {
-                    fullContent +=
-                      '<span class="text-xs text-red-500">exit code: ' +
-                      tool.state.metadata.exit +
-                      "</span>\n\n";
                   }
                 } else {
                   // Fallback to raw output
                   fullContent += "```\n";
-                  fullContent += output + "\n";
+                  fullContent += output.replaceAll("```", "\\`\\`\\`") + "\n";
                   fullContent += "```\n";
                 }
               }
@@ -220,44 +256,50 @@ export default function MessageList({
           return (
             <div key={msg.info.id} className="flex flex-col mb-4">
               <div className="flex justify-start">
-                <div className="message-bubble max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-100">
+                <div className="message-bubble max-w-[95%] sm:max-w-[85%] lg:max-w-[75%] xl:max-w-[1200px] px-4 py-2 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-100">
                   <MessageContent
                     content={fullContent}
                     isStreaming={msgIndex === sortedMessages.length - 1}
-                    permission={
-                      activePermission &&
-                      onRespondPermission &&
-                      (msg.parts || []).some(
-                        (p) =>
-                          p.type === "tool" &&
-                          p.callID === activePermission.callID,
-                      )
-                        ? activePermission
-                        : null
-                    }
-                    onRespondPermission={onRespondPermission ?? null}
                   />
-                  {/*{activePermission &&
-                    onRespondPermission &&
+                  {onRespondPermission &&
+                    activePermission &&
                     (msg.parts || []).some(
                       (p) =>
                         p.type === "tool" &&
                         p.callID === activePermission.callID,
                     ) && (
-                      <>
-                        {console.log(activePermission.callID, activePermission)}
-                        <div className="mt-2">
-                          <InlinePermission
-                            permission={activePermission}
-                            onRespond={onRespondPermission}
-                          />
-                        </div>
-                      </>
-                    )}*/}
+                      <InlinePermission
+                        permission={activePermission}
+                        onRespond={onRespondPermission}
+                      />
+                    )}
                 </div>
               </div>
-              <div className="text-left text-xs text-gray-500 dark:text-gray-400 mt-1 ml-2">
-                {timeStr}
+              <div className="text-left text-xs text-gray-500 dark:text-gray-400 mt-1 ml-2 flex items-center gap-3">
+                <span>{timeStr}</span>
+                {msg.info.modelID && (
+                  <span
+                    className="text-gray-400"
+                    title={`Model: ${msg.info.modelID}`}
+                  >
+                    {msg.info.modelID}
+                  </span>
+                )}
+                {msg.info.tokens && (
+                  <span className="text-gray-400" title="Token usage">
+                    {(
+                      (msg.info.tokens.input || 0) +
+                      (msg.info.tokens.output || 0) +
+                      (msg.info.tokens.reasoning || 0)
+                    ).toLocaleString()}{" "}
+                    tokens
+                  </span>
+                )}
+                {msg.info.cost !== undefined && msg.info.cost > 0 && (
+                  <span className="text-gray-400" title="Cost">
+                    ${msg.info.cost.toFixed(4)}
+                  </span>
+                )}
               </div>
             </div>
           );
