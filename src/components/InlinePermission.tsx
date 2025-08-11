@@ -29,9 +29,10 @@ export default function InlinePermission({
         <div className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
           🔐 Permission Required
         </div>
-        <div className="text-sm text-gray-700 dark:text-gray-300">
+        {/*{JSON.stringify(permission, null, 2)}*/}
+        {/*<div className="text-sm text-gray-700 dark:text-gray-300">
           {permission.title}
-        </div>
+        </div>*/}
         {permission.pattern && (
           <div className="text-xs text-gray-600 dark:text-gray-400 font-mono">
             Pattern: {permission.pattern}

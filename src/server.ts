@@ -128,21 +128,21 @@ const server = serve({
       try {
         const providersRes = await fetch(`${OPENCODE_URL}/config/providers`);
         debugInfo.providers = await providersRes.json();
-      } catch (e) {
+      } catch (e: any) {
         debugInfo.errors.push(`Providers: ${e.message}`);
       }
 
       try {
         const agentsRes = await fetch(`${OPENCODE_URL}/agent`);
         debugInfo.agents = await agentsRes.json();
-      } catch (e) {
+      } catch (e: any) {
         debugInfo.errors.push(`Agents: ${e.message}`);
       }
 
       try {
         const sessionsRes = await fetch(`${OPENCODE_URL}/session`);
         debugInfo.sessions = await sessionsRes.json();
-      } catch (e) {
+      } catch (e: any) {
         debugInfo.errors.push(`Sessions: ${e.message}`);
       }
 
@@ -201,7 +201,9 @@ const server = serve({
         const response = await fetch(`${OPENCODE_URL}/session/${sessionId}`, {
           method: "DELETE",
         });
-        return new Response(null, { status: response.ok ? 204 : response.status });
+        return new Response(null, {
+          status: response.ok ? 204 : response.status,
+        });
       }
       return new Response("Method not allowed", { status: 405 });
     },
@@ -224,7 +226,7 @@ const server = serve({
 
         const messages = await response.json();
         return Response.json(messages);
-      } catch (error) {
+      } catch (error: any) {
         return Response.json({ error: error.message }, { status: 500 });
       }
     },
@@ -241,14 +243,14 @@ const server = serve({
       if (req.method !== "POST") {
         return new Response("Method not allowed", { status: 405 });
       }
-      
+
       const sessionId = req.params.sessionId;
       const body = await req.json();
       const action = body.action || "reject"; // "accept" | "reject"
       const responseType = action === "accept" ? "once" : "reject";
-      
+
       const state = await opencodeClient.getSessionState(sessionId);
-      
+
       // Handle all pending permissions
       const handled = [];
       const failed = [];
@@ -263,7 +265,7 @@ const server = serve({
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ response: responseType }),
-                }
+                },
               );
               if (response.ok) {
                 handled.push(permId);
@@ -277,15 +279,33 @@ const server = serve({
           }
         }
       }
-      
-      return Response.json({ 
-        action, 
-        handled, 
+
+      return Response.json({
+        action,
+        handled,
         failed,
         totalCount: handled.length + failed.length,
         handledCount: handled.length,
-        failedCount: failed.length
+        failedCount: failed.length,
       });
+    },
+
+    // Enable event buffering for a session (during transitions)
+    "/session/:sessionId/buffer/enable": {
+      async POST(req) {
+        const { sessionId } = req.params;
+        opencodeClient.enableBuffering(sessionId);
+        return Response.json({ success: true });
+      },
+    },
+
+    // Disable event buffering and flush events
+    "/session/:sessionId/buffer/disable": {
+      async POST(req) {
+        const { sessionId } = req.params;
+        opencodeClient.disableBuffering(sessionId);
+        return Response.json({ success: true });
+      },
     },
 
     // SSE endpoint for streaming state updates to browser
@@ -358,7 +378,7 @@ const server = serve({
             body.response,
           );
           return Response.json({ success: true });
-        } catch (error) {
+        } catch (error: any) {
           console.error("Permission response error:", error);
           return new Response(error.message, { status: 500 });
         }
@@ -419,7 +439,7 @@ const server = serve({
             sessionId: currentSessionId,
             streaming: true,
           });
-        } catch (error) {
+        } catch (error: any) {
           console.error("Chat error:", error);
           return Response.json({ error: error.message }, { status: 500 });
         }

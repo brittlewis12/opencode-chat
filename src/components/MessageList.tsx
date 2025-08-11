@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
@@ -31,6 +31,7 @@ interface Message {
     output?: string;
     error?: string;
     synthetic?: boolean;
+    callID?: string; // For tool calls
   }>;
 }
 
@@ -223,21 +224,36 @@ export default function MessageList({
                   <MessageContent
                     content={fullContent}
                     isStreaming={msgIndex === sortedMessages.length - 1}
+                    permission={
+                      activePermission &&
+                      onRespondPermission &&
+                      (msg.parts || []).some(
+                        (p) =>
+                          p.type === "tool" &&
+                          p.callID === activePermission.callID,
+                      )
+                        ? activePermission
+                        : null
+                    }
+                    onRespondPermission={onRespondPermission ?? null}
                   />
-                  {activePermission &&
+                  {/*{activePermission &&
                     onRespondPermission &&
                     (msg.parts || []).some(
                       (p) =>
-                        (p as any).type === "tool" &&
-                        (p as any).callID === activePermission.callID,
+                        p.type === "tool" &&
+                        p.callID === activePermission.callID,
                     ) && (
-                      <div className="mt-2">
-                        <InlinePermission
-                          permission={activePermission}
-                          onRespond={onRespondPermission}
-                        />
-                      </div>
-                    )}
+                      <>
+                        {console.log(activePermission.callID, activePermission)}
+                        <div className="mt-2">
+                          <InlinePermission
+                            permission={activePermission}
+                            onRespond={onRespondPermission}
+                          />
+                        </div>
+                      </>
+                    )}*/}
                 </div>
               </div>
               <div className="text-left text-xs text-gray-500 dark:text-gray-400 mt-1 ml-2">

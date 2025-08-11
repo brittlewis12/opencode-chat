@@ -2,6 +2,9 @@ import React from "react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import CopyButton from "./CopyButton";
+import type { PermissionInfo } from "./InlinePermission";
+import InlinePermission from "./InlinePermission";
+import type { Message } from "../types";
 
 interface MessagePart {
   type: "text" | "code" | "tool";
@@ -21,12 +24,17 @@ function parseMessageContent(content: string): MessagePart[] {
 
   while (i < lines.length) {
     const line = lines[i];
-
     // Check for tool details
-    if (line.includes("<details") && lines[i + 1]?.includes("› ")) {
+    const nextLine = lines[i + 1];
+    if (
+      line &&
+      line.includes("<details") &&
+      nextLine &&
+      nextLine.includes("› ")
+    ) {
       const statusMatch = line.match(/data-tool-status="(\w+)"/);
       const status = (statusMatch?.[1] as any) || "completed";
-      const toolMatch = lines[i + 1].match(/› (\w+)/);
+      const toolMatch = nextLine.match(/› (\w+)/);
       const toolName = toolMatch?.[1] || "tool";
 
       // Find the end of this details block
@@ -37,28 +45,28 @@ function parseMessageContent(content: string): MessagePart[] {
       let inCommand = false;
       let inOutput = false;
 
-      while (j < lines.length && !lines[j].includes("</details>")) {
-        if (lines[j].startsWith("```bash")) {
+      while (j < lines.length && !lines[j]?.includes("</details>")) {
+        if (lines[j]?.startsWith("```bash")) {
           inCommand = true;
           j++;
-          while (j < lines.length && !lines[j].startsWith("```")) {
+          while (j < lines.length && !lines[j]?.startsWith("```")) {
             if (command) command += "\n";
-            command += lines[j].replace(/^\$ /, "");
+            command += lines[j]!.replace(/^\$ /, "");
             j++;
           }
           inCommand = false;
-        } else if (lines[j].startsWith("```") && !inCommand) {
+        } else if (lines[j]?.startsWith("```") && !inCommand) {
           inOutput = true;
           j++;
-          while (j < lines.length && !lines[j].startsWith("```")) {
+          while (j < lines.length && !lines[j]?.startsWith("```")) {
             if (output) output += "\n";
             output += lines[j];
             j++;
           }
           inOutput = false;
-        } else if (lines[j].includes('class="text-xs text-gray-500 italic"')) {
-          const descMatch = lines[j].match(/>([^<]+)</);
-          if (descMatch) description = descMatch[1];
+        } else if (lines[j]?.includes('class="text-xs text-gray-500 italic"')) {
+          const descMatch = lines[j]!.match(/>([^<]+)</);
+          if (descMatch && descMatch[1]) description = descMatch[1];
         }
         j++;
       }
@@ -76,12 +84,12 @@ function parseMessageContent(content: string): MessagePart[] {
       i = j + 1;
     }
     // Check for code blocks
-    else if (line.startsWith("```")) {
+    else if (line?.startsWith("```")) {
       const language = line.slice(3).trim() || "text";
       let code = "";
       i++;
 
-      while (i < lines.length && !lines[i].startsWith("```")) {
+      while (i < lines.length && lines[i] && !lines[i]!.startsWith("```")) {
         if (code) code += "\n";
         code += lines[i];
         i++;
@@ -103,14 +111,14 @@ function parseMessageContent(content: string): MessagePart[] {
       // Collect consecutive text lines
       while (
         i < lines.length &&
-        !lines[i].startsWith("```") &&
-        !lines[i].includes("<details")
+        !lines[i]?.startsWith("```") &&
+        !lines[i]?.includes("<details")
       ) {
         text += "\n" + lines[i];
         i++;
       }
 
-      if (text.trim()) {
+      if (text?.trim()) {
         parts.push({
           type: "text",
           content: text,
@@ -153,15 +161,21 @@ function ToolSpinner() {
 export default function MessageContent({
   content,
   isStreaming = false,
+  permission = null,
+  onRespondPermission = null,
 }: {
   content: string;
   isStreaming?: boolean;
+  permission: PermissionInfo | null;
+  onRespondPermission:
+    | ((response: "once" | "always" | "reject") => void)
+    | null;
 }) {
-  const parts = parseMessageContent(content);
+  const parsedParts = parseMessageContent(content);
 
   return (
     <div className="message-content">
-      {parts.map((part, index) => {
+      {parsedParts.map((part, index) => {
         if (part.type === "text") {
           const html = marked.parse(part.content) as string;
           const clean = DOMPurify.sanitize(html);
@@ -199,6 +213,23 @@ export default function MessageContent({
                 <span>› {part.toolName}</span>
                 {isRunning && <ToolSpinner />}
               </summary>
+
+              {onRespondPermission &&
+                permission && //? (
+                // permission.pattern &&
+                part.command &&
+                part.command.includes(permission.title.trim()) && (
+                  // part.callID === permission.callID ? (
+                  <>
+                    {console.log(permission.title)}
+                    <div className="mt-2">
+                      <InlinePermission
+                        permission={permission}
+                        onRespond={onRespondPermission}
+                      />
+                    </div>
+                  </>
+                )}
 
               {part.command && (
                 <div className="relative group mt-2">

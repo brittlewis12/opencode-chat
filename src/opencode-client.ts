@@ -29,6 +29,8 @@ class OpenCodeClient {
     (sessionId: string, state: SessionState) => void
   >();
   private isConnecting = false;
+  private eventBuffer = new Map<string, any[]>(); // Buffer events per session during transitions
+  private bufferingSessions = new Set<string>(); // Track which sessions are buffering
 
   constructor(private opencodeUrl: string) {
     this.connect();
@@ -88,7 +90,18 @@ class OpenCodeClient {
             try {
               const data = JSON.parse(dataPayload);
               console.log('[OpenCode Event]', data.type);
-              this.handleEvent(data);
+              // Buffer events if session is in buffering mode
+              const sessionId = this.extractSessionId(data);
+              if (sessionId && this.bufferingSessions.has(sessionId)) {
+                if (!this.eventBuffer.has(sessionId)) {
+                  this.eventBuffer.set(sessionId, []);
+                }
+                this.eventBuffer.get(sessionId)!.push(data);
+                console.log(`Buffered event for session ${sessionId}: ${data.type}`);
+                // Don't process the event now, it will be flushed later
+              } else {
+                this.handleEvent(data);
+              }
             } catch (e) {
               console.error("Failed to parse SSE JSON:", e);
             }
@@ -252,6 +265,30 @@ class OpenCodeClient {
   private notifyListeners(sessionId: string, state: SessionState) {
     for (const listener of this.listeners) {
       listener(sessionId, state);
+    }
+  }
+
+  // Buffer management methods
+  enableBuffering(sessionId: string) {
+    this.bufferingSessions.add(sessionId);
+    if (!this.eventBuffer.has(sessionId)) {
+      this.eventBuffer.set(sessionId, []);
+    }
+    console.log(`Event buffering enabled for session ${sessionId}`);
+  }
+
+  disableBuffering(sessionId: string) {
+    this.bufferingSessions.delete(sessionId);
+    // Flush any buffered events
+    const buffered = this.eventBuffer.get(sessionId) || [];
+    if (buffered.length > 0) {
+      console.log(`Flushing ${buffered.length} buffered events for session ${sessionId}`);
+      for (const event of buffered) {
+        this.handleEvent(event);
+      }
+      this.eventBuffer.delete(sessionId);
+    } else {
+      console.log(`No buffered events to flush for session ${sessionId}`);
     }
   }
 

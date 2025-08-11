@@ -12,9 +12,26 @@ interface ChatProps {
 
 export default function Chat({ sessionId: propSessionId }: ChatProps) {
   const [sessionId, setSessionId] = useState(propSessionId)
-  // Keep internal sessionId in sync with prop (e.g., New Chat)
+  const sessionSwitchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Keep internal sessionId in sync with prop (e.g., New Chat) with debounce
   useEffect(() => {
-    setSessionId(propSessionId)
+    // Clear any pending session switch
+    if (sessionSwitchTimeoutRef.current) {
+      clearTimeout(sessionSwitchTimeoutRef.current)
+    }
+    
+    // Debounce rapid session changes
+    sessionSwitchTimeoutRef.current = setTimeout(() => {
+      setSessionId(propSessionId)
+      sessionSwitchTimeoutRef.current = null
+    }, 50) // 50ms debounce
+    
+    return () => {
+      if (sessionSwitchTimeoutRef.current) {
+        clearTimeout(sessionSwitchTimeoutRef.current)
+      }
+    }
   }, [propSessionId])
   const [input, setInput] = useState('')
   const [selectedModel, setSelectedModel] = useState('')
@@ -145,6 +162,20 @@ export default function Chat({ sessionId: propSessionId }: ChatProps) {
         } else if (state?.currentPermission) {
           // backward-compat if old shape
           setPendingPermission(state.currentPermission)
+        } else {
+          // Try to recover permission from localStorage
+          const keys = Object.keys(localStorage).filter(k => k.startsWith(`permission_${sessionId}_`))
+          if (keys.length > 0) {
+            try {
+              const recovered = JSON.parse(localStorage.getItem(keys[0]) || '{}')
+              if (recovered.id) {
+                console.log('Recovered permission from localStorage:', recovered.id)
+                setPendingPermission(recovered)
+              }
+            } catch (e) {
+              console.error('Failed to recover permission:', e)
+            }
+          }
         }
       })
       .catch(err => console.error('Failed to fetch initial state:', err))
@@ -153,6 +184,14 @@ export default function Chat({ sessionId: propSessionId }: ChatProps) {
   // Connect to our server's SSE for streaming state updates
   useEffect(() => {
     if (!sessionId) return
+
+    // Enable buffering BEFORE closing old connection
+    const previousSessionId = eventSourceRef.current?.url?.match(/sessionId=([^&]+)/)?.[1]
+    if (previousSessionId && previousSessionId !== sessionId) {
+      // Switching sessions - enable buffering for the new session
+      fetch(`/session/${sessionId}/buffer/enable`, { method: 'POST' })
+        .catch(err => console.error('Failed to enable buffering:', err))
+    }
 
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
@@ -235,6 +274,9 @@ export default function Chat({ sessionId: propSessionId }: ChatProps) {
       lastEventRef.current = Date.now()
       // when SSE opens, favor SSE by stopping any polling
       stopPolling()
+      // Disable buffering and flush any buffered events
+      fetch(`/session/${sessionId}/buffer/disable`, { method: 'POST' })
+        .catch(err => console.error('Failed to disable buffering:', err))
     }
 
     eventSource.onerror = () => {
@@ -257,9 +299,17 @@ export default function Chat({ sessionId: propSessionId }: ChatProps) {
           // Update permission from queue if present
           const activeId = state?.permissions?.activeId
           if (activeId && state?.permissions?.byId?.[activeId]) {
-            setPendingPermission(state.permissions.byId[activeId])
+            const perm = state.permissions.byId[activeId]
+            setPendingPermission(perm)
+            // Persist permission to localStorage for recovery
+            if (sessionId) {
+              localStorage.setItem(`permission_${sessionId}_${perm.id}`, JSON.stringify(perm))
+            }
           } else if (state?.currentPermission) {
             setPendingPermission(state.currentPermission)
+            if (sessionId && state.currentPermission.id) {
+              localStorage.setItem(`permission_${sessionId}_${state.currentPermission.id}`, JSON.stringify(state.currentPermission))
+            }
           } else {
             setPendingPermission(null)
           }
@@ -445,6 +495,10 @@ export default function Chat({ sessionId: propSessionId }: ChatProps) {
       
       if (res.ok) {
         setPendingPermission(null)
+        // Clean up from localStorage
+        if (pendingPermission.sessionID && permissionId) {
+          localStorage.removeItem(`permission_${pendingPermission.sessionID}_${permissionId}`)
+        }
         // Clear from running tools if it was there
         if (pendingPermission.callID) {
           setRunningTools(prev => {
