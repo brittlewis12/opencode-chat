@@ -10,12 +10,14 @@
     "format": "bunx prettier --write 'src/**/*.{ts,tsx,html,css,json}'"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "@types/bun": "1.2.20"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
+    "@base-ui-components/react": "^1.0.0-beta.2",
     "@tanstack/react-query": "^5.84.2",
     "@tanstack/react-router": "^1.131.3",
     "@types/dompurify": "^3.2.0",
@@ -23,6 +25,7 @@
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "dompurify": "^3.2.6",
+    "highlight.js": "^11.11.1",
     "marked": "^16.1.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

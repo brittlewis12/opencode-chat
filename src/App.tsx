@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Chat from "./components/Chat";
 import SessionList from "./components/SessionList";
+import PlaygroundSimple from "./pages/PlaygroundSimple";
 
 export default function App() {
   const [showSessions, setShowSessions] = useState(false);
+  const [showPlayground, setShowPlayground] = useState(
+    window.location.pathname === "/playground",
+  );
   const [sessionId, setSessionId] = useState<string | null>(
     localStorage.getItem("opencodeSessionId"),
   );
@@ -34,6 +38,10 @@ export default function App() {
     setShowSessions(false);
   };
 
+  if (showPlayground) {
+    return <PlaygroundSimple />;
+  }
+
   return (
     <div className="bg-gradient-to-br from-slate-800 to-slate-900 h-[100dvh] p-0 sm:p-4">
       <div className="w-full max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1600px] h-[100dvh] sm:h-[90vh] sm:mx-auto bg-white dark:bg-slate-800 sm:rounded-2xl shadow-2xl flex flex-col">
@@ -60,12 +68,20 @@ export default function App() {
               <span className="font-semibold text-lg">New Chat</span>
             )}
           </div>
-          <button
-            onClick={handleNewChat}
-            className="px-3 py-1 bg-white/20 rounded hover:bg-white/30 text-sm"
-          >
-            New Chat
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => (window.location.href = "/playground")}
+              className="px-3 py-1 bg-white/20 rounded hover:bg-white/30 text-sm"
+            >
+              UI Lab
+            </button>
+            <button
+              onClick={handleNewChat}
+              className="px-3 py-1 bg-white/20 rounded hover:bg-white/30 text-sm"
+            >
+              New Chat
+            </button>
+          </div>
         </div>
 
         {showSessions ? (

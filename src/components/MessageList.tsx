@@ -6,6 +6,43 @@ import MessageContent from "./MessageContent";
 import InlinePermission from "./InlinePermission";
 import type { PermissionInfo } from "./InlinePermission";
 
+// Helper function for file icons - updated for better tool output display
+function getFileIcon(extension: string): string {
+  const iconMap: Record<string, string> = {
+    js: "📄",
+    ts: "📘",
+    tsx: "⚛️",
+    jsx: "⚛️",
+    py: "🐍",
+    java: "☕",
+    cpp: "⚡",
+    c: "⚡",
+    html: "🌐",
+    css: "🎨",
+    scss: "🎨",
+    sass: "🎨",
+    json: "📋",
+    xml: "📋",
+    yaml: "📋",
+    yml: "📋",
+    md: "📝",
+    txt: "📄",
+    log: "📜",
+    png: "🖼️",
+    jpg: "🖼️",
+    jpeg: "🖼️",
+    gif: "🖼️",
+    svg: "🖼️",
+    pdf: "📕",
+    doc: "📄",
+    docx: "📄",
+    zip: "📦",
+    tar: "📦",
+    gz: "📦",
+  };
+  return iconMap[extension] || "📄";
+}
+
 interface MessageListProps {
   messages: Message[];
   isThinking?: boolean;
@@ -154,11 +191,35 @@ export default function MessageList({
               // const isRunning =
               //   part.state.status === "running" ||
               //   part.state.status === "pending";
+              // Add tool name with file path for read/edit/list tools
+              let toolDisplay = part.tool;
+              if (
+                part.tool &&
+                part.tool.toLowerCase() === "read" &&
+                part.state.input?.filePath
+              ) {
+                toolDisplay = part.tool + " " + part.state.input.filePath;
+              } else if (
+                part.tool &&
+                (part.tool.toLowerCase() === "edit" ||
+                  part.tool === "MultiEdit") &&
+                part.state.input?.file_path
+              ) {
+                toolDisplay = part.tool + " " + part.state.input.file_path;
+              } else if (
+                part.tool &&
+                (part.tool.toLowerCase() === "ls" ||
+                  part.tool.toLowerCase() === "list") &&
+                part.state.input?.path
+              ) {
+                toolDisplay = part.tool + " " + part.state.input.path;
+              }
+
               fullContent +=
                 '\n\n<details open data-tool-status="' +
                 part.state.status +
                 '">\n<summary class="text-sm font-mono text-indigo-600 dark:text-indigo-400">› ' +
-                part.tool +
+                toolDisplay +
                 "</summary>\n\n";
 
               if (part.state.input) {
@@ -172,6 +233,119 @@ export default function MessageList({
                       part.state.input.description +
                       "</span>\n\n";
                   }
+                }
+                // Don't show input for Read tool since it's in the summary
+                else if (part.tool && part.tool.toLowerCase() === "read") {
+                  // Skip - already shown in summary
+                }
+                // Special formatting for Edit tool - show as diff
+                else if (
+                  part.tool &&
+                  (part.tool.toLowerCase() === "edit" ||
+                    part.tool === "MultiEdit") &&
+                  part.state.input.file_path
+                ) {
+                  const filePath = part.state.input.file_path;
+                  fullContent +=
+                    '<span class="text-sm font-mono text-gray-600 dark:text-gray-400">' +
+                    filePath +
+                    "</span>\n";
+
+                  if (part.state.input.replace_all) {
+                    fullContent +=
+                      '<span class="text-xs text-orange-600 dark:text-orange-400"> (replace all)</span>\n';
+                  }
+
+                  // Show unified diff format
+                  const oldString = part.state.input.old_string || "";
+                  const newString = part.state.input.new_string || "";
+
+                  if (oldString || newString) {
+                    fullContent += "\n```diff\n";
+
+                    // Split into lines for better diff display
+                    const oldLines = oldString.split("\n");
+                    const newLines = newString.split("\n");
+
+                    // Show removed lines
+                    if (oldString) {
+                      for (const line of oldLines) {
+                        fullContent +=
+                          "- " + line.replaceAll("```", "\\`\\`\\`") + "\n";
+                      }
+                    }
+
+                    // Show added lines
+                    if (newString) {
+                      for (const line of newLines) {
+                        fullContent +=
+                          "+ " + line.replaceAll("```", "\\`\\`\\`") + "\n";
+                      }
+                    }
+
+                    fullContent += "```\n\n";
+                  }
+                }
+                // Special formatting for MultiEdit tool
+                else if (
+                  part.tool === "MultiEdit" &&
+                  part.state.input.file_path
+                ) {
+                  const filePath = part.state.input.file_path;
+                  fullContent +=
+                    '<span class="text-sm font-mono text-gray-600 dark:text-gray-400">' +
+                    filePath +
+                    "</span>\n";
+
+                  const edits = part.state.input.edits || [];
+                  if (edits.length > 0) {
+                    fullContent +=
+                      '<span class="text-xs text-gray-500"> (' +
+                      edits.length +
+                      " edits)</span>\n\n";
+
+                    // Show each edit as a diff
+                    for (let i = 0; i < Math.min(edits.length, 3); i++) {
+                      const edit = edits[i];
+                      if (edit.old_string || edit.new_string) {
+                        fullContent += "```diff\n";
+
+                        if (edit.old_string) {
+                          const oldLines = edit.old_string.split("\n");
+                          for (const line of oldLines) {
+                            fullContent +=
+                              "- " + line.replaceAll("```", "\\`\\`\\`") + "\n";
+                          }
+                        }
+
+                        if (edit.new_string) {
+                          const newLines = edit.new_string.split("\n");
+                          for (const line of newLines) {
+                            fullContent +=
+                              "+ " + line.replaceAll("```", "\\`\\`\\`") + "\n";
+                          }
+                        }
+
+                        fullContent += "```\n";
+                      }
+                    }
+
+                    if (edits.length > 3) {
+                      fullContent +=
+                        '<span class="text-xs text-gray-500">... and ' +
+                        (edits.length - 3) +
+                        " more edits</span>\n";
+                    }
+                    fullContent += "\n";
+                  }
+                }
+                // Don't show input for List/LS tool since it's in the summary
+                else if (
+                  part.tool &&
+                  (part.tool.toLowerCase() === "ls" ||
+                    part.tool.toLowerCase() === "list")
+                ) {
+                  // Skip - already shown in summary
                 } else {
                   fullContent +=
                     '<span class="text-xs text-gray-500">input:</span>\n```json\n';
@@ -214,8 +388,26 @@ export default function MessageList({
                     "</span>\n\n";
                 }
               } else if (part.state.output) {
-                // Parse stdout/stderr tags if present
                 const output = part.state.output;
+
+                // Special formatting for Edit tool - check for success/error messages
+                if (
+                  part.tool === "edit" ||
+                  part.tool === "Edit" ||
+                  part.tool === "MultiEdit"
+                ) {
+                  const hasSuccess =
+                    /successfully|success|\d+ replacement/i.test(output);
+                  const hasError = /error|failed|not found/i.test(output);
+
+                  if (hasSuccess) {
+                    fullContent += "✅ ";
+                  } else if (hasError) {
+                    fullContent += "❌ ";
+                  }
+                }
+
+                // Parse stdout/stderr tags if present
                 const stdoutMatch = output.match(
                   /<stdout>\n?([\s\S]*?)\n?<\/stdout>/,
                 );
