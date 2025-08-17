@@ -86,8 +86,12 @@ marked.setOptions({
   smartypants: false,
   highlight: function (code, lang) {
     if (!lang) return code;
-    const language = hljs.getLanguage(lang) ? lang : "plaintext";
-    return hljs.highlight(code, { language }).value;
+    try {
+      const language = hljs.getLanguage(lang) ? lang : "plaintext";
+      return hljs.highlight(code, { language }).value;
+    } catch (e) {
+      return code;
+    }
   },
   langPrefix: "language-",
 });
@@ -113,9 +117,11 @@ function MarkdownMessage({ content }) {
         const codeNode = node.querySelector("code");
         if (codeNode) {
           const language = codeNode.className?.replace("language-", "") || "";
+          // Get the already highlighted HTML from marked
           return {
             type: "code",
             content: codeNode.textContent,
+            html: codeNode.innerHTML,
             language,
           };
         }
@@ -626,11 +632,8 @@ export default function PlaygroundSimple() {
               <input className="field-input" type="number" placeholder="0" />
             </div>
           </div>
-          <div
-            className="component-grid"
-            style={{ marginTop: "var(--spacing-md)" }}
-          >
-            <div className="field" style={{ width: "100%" }}>
+          <div style={{ marginTop: "var(--spacing-md)", width: "100%" }}>
+            <div className="field">
               <label className="field-label">Textarea</label>
               <textarea
                 className="field-textarea"
@@ -712,17 +715,37 @@ export default function PlaygroundSimple() {
 
         <section className="showcase-section">
           <h2>Code Blocks</h2>
-          <div className="code-block">
-            <div className="code-header">
-              <span className="code-lang">JavaScript</span>
-              <button className="code-copy">Copy</button>
-            </div>
-            <pre className="code-content">
-              <code className="language-javascript">{`function calculateTheme(mode) {
+          <div
+            className="message-code-block"
+            key={`code-block-${density}-${theme}`}
+          >
+            <div className="message-code-wrapper">
+              <div className="message-copy-button-wrapper">
+                <CopyButton
+                  text={`function calculateTheme(mode) {
   const themes = ['liquid-dark', 'liquid-light', 'terminal', 'pastel'];
   return themes.find(t => t.includes(mode)) || themes[0];
-}`}</code>
-            </pre>
+}`}
+                />
+              </div>
+              <pre className="message-content-pre">
+                <code
+                  className="language-javascript"
+                  dangerouslySetInnerHTML={{
+                    __html: hljs.highlight(
+                      `function calculateTheme(mode) {
+  const themes = ['liquid-dark', 'liquid-light', 'terminal', 'pastel'];
+  return themes.find(t => t.includes(mode)) || themes[0];
+}`,
+                      { language: "javascript" },
+                    ).value,
+                  }}
+                />
+              </pre>
+            </div>
+            <div className="message-code-header">
+              <span className="message-code-lang">javascript</span>
+            </div>
           </div>
         </section>
 
@@ -882,13 +905,14 @@ These examples show proper typing and async handling!`}
                 <li>Ordered list item 3</li>
               </ol>
 
-              <div className="markdown-code-block">
-                <div className="code-header">
-                  <span className="code-lang">TypeScript</span>
-                  <button className="code-copy">Copy</button>
-                </div>
-                <pre className="code-content">
-                  <code className="language-typescript">{`interface Theme {
+              <div
+                className="message-code-block"
+                key={`markdown-ts-${density}-${theme}`}
+              >
+                <div className="message-code-wrapper">
+                  <div className="message-copy-button-wrapper">
+                    <CopyButton
+                      text={`interface Theme {
   name: string;
   colors: {
     primary: string;
@@ -903,25 +927,80 @@ const applyTheme = (theme: Theme): void => {
     root.style.setProperty('--primary', theme.colors.primary);
     // Apply other theme properties
   }
-};`}</code>
-                </pre>
+};`}
+                    />
+                  </div>
+                  <pre className="message-content-pre">
+                    <code
+                      className="language-typescript"
+                      dangerouslySetInnerHTML={{
+                        __html: hljs.highlight(
+                          `interface Theme {
+  name: string;
+  colors: {
+    primary: string;
+    secondary: string;
+  };
+  isDark: boolean;
+}
+
+const applyTheme = (theme: Theme): void => {
+  const root = document.querySelector(':root');
+  if (root) {
+    root.style.setProperty('--primary', theme.colors.primary);
+    // Apply other theme properties
+  }
+};`,
+                          { language: "typescript" },
+                        ).value,
+                      }}
+                    />
+                  </pre>
+                </div>
+                <div className="message-code-header">
+                  <span className="message-code-lang">typescript</span>
+                </div>
               </div>
 
-              <div className="markdown-code-block">
-                <div className="code-header">
-                  <span className="code-lang">Python</span>
-                  <button className="code-copy">Copy</button>
-                </div>
-                <pre className="code-content">
-                  <code className="language-python">{`import asyncio
+              <div
+                className="message-code-block"
+                key={`markdown-py-${density}-${theme}`}
+              >
+                <div className="message-code-wrapper">
+                  <div className="message-copy-button-wrapper">
+                    <CopyButton
+                      text={`import asyncio
 from typing import List, Dict
 
 async def process_messages(messages: List[Dict]) -> None:
     """Process chat messages asynchronously."""
     for message in messages:
         await handle_message(message)
-        print(f"Processed: {message['id']}")`}</code>
-                </pre>
+        print(f"Processed: {message['id']}")`}
+                    />
+                  </div>
+                  <pre className="message-content-pre">
+                    <code
+                      className="language-python"
+                      dangerouslySetInnerHTML={{
+                        __html: hljs.highlight(
+                          `import asyncio
+from typing import List, Dict
+
+async def process_messages(messages: List[Dict]) -> None:
+    """Process chat messages asynchronously."""
+    for message in messages:
+        await handle_message(message)
+        print(f"Processed: {message['id']}")`,
+                          { language: "python" },
+                        ).value,
+                      }}
+                    />
+                  </pre>
+                </div>
+                <div className="message-code-header">
+                  <span className="message-code-lang">python</span>
+                </div>
               </div>
 
               <table className="markdown-table">

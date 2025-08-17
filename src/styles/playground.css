@@ -294,6 +294,8 @@ body:has(.theme-pastel) {
   transition: all var(--transition-normal);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  max-width: 1400px;
+  margin: 0 auto;
   box-shadow: none;
   position: relative;
   z-index: 1;
@@ -416,6 +418,29 @@ body:has(.theme-pastel) {
   overflow: hidden;
   z-index: 100;
   box-shadow: var(--shadow-lg);
+  transform-origin: top center; /* Default center since dropdown spans full width */
+  animation: dropdownOpen 150ms ease-out;
+}
+
+@keyframes dropdownOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* For selects that should expand from left */
+.custom-select-left .custom-select-dropdown {
+  transform-origin: top left;
+}
+
+/* For selects that should expand from right */
+.custom-select-right .custom-select-dropdown {
+  transform-origin: top right;
 }
 
 .custom-select-option {
@@ -445,11 +470,15 @@ body:has(.theme-pastel) {
   gap: var(--spacing-xl);
 }
 
+/* Make showcase sections flex containers for proper code block sizing */
 .showcase-section {
   background: var(--bg-secondary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   border: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* Changed from flex-start to stretch */
 }
 
 .showcase-section h2 {
@@ -534,7 +563,8 @@ body:has(.theme-pastel) {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
-  min-width: 200px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .field-label {
@@ -545,6 +575,7 @@ body:has(.theme-pastel) {
 
 .field-input,
 .field-textarea {
+  width: 100%;
   padding: var(--density-padding);
   background: var(--bg-glass);
   backdrop-filter: blur(var(--glass-blur));
@@ -554,6 +585,7 @@ body:has(.theme-pastel) {
   color: var(--text-primary);
   transition: all var(--transition-fast);
   font-size: var(--density-font-size);
+  box-sizing: border-box;
 }
 
 .field-input:focus,
@@ -886,27 +918,37 @@ body:has(.theme-pastel) {
   gap: var(--spacing-sm);
 }
 
-/* Code Block Styles */
+/* Code Block Styles - Matching message code blocks exactly */
 .code-block {
-  background: var(--bg-primary);
+  margin: 0.5rem 0;
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  border-radius: 8px;
+  overflow: visible;
+}
+
+.code-block .code-content {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.code-block .code-header {
+  border-radius: 0 0 8px 8px !important;
 }
 
 .code-header {
+  background: #1a1a24;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.25rem 0.75rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--bg-elevated);
-  border-bottom: 1px solid var(--border-default);
+  border-radius: 0;
 }
 
 .code-lang {
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   color: var(--accent-primary);
-  font-weight: 500;
+  text-transform: lowercase;
+  font-family: ui-monospace, "SF Mono", monospace;
 }
 
 .code-copy {
@@ -926,8 +968,11 @@ body:has(.theme-pastel) {
 }
 
 .code-content {
-  padding: var(--spacing-md);
-  margin: 0;
+  background: #1a1a24 !important;
+  border: none;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 0.75rem;
+  margin: 0 !important;
   color: var(--text-primary);
   overflow-x: auto;
 }
@@ -1006,8 +1051,11 @@ body:has(.theme-pastel) {
 .message-code-block {
   margin: 0.5rem 0;
   border: 1px solid var(--border-default);
-  border-radius: 0;
+  border-radius: 8px;
   overflow: visible;
+  width: fit-content;
+  max-width: 100%;
+  min-width: min-content;
 }
 
 .message-code-wrapper {
@@ -1041,20 +1089,16 @@ body:has(.theme-pastel) {
 
 .message-code-lang {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--accent-primary);
   text-transform: lowercase;
   font-family: ui-monospace, "SF Mono", monospace;
 }
 
 .message-user .message-code-lang {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--accent-primary);
 }
 
 /* Make all message code blocks have proper corners for footer placement */
-.message-content .message-code-block {
-  border-radius: 0;
-  overflow: visible;
-}
 
 .message-content .message-code-header {
   border-radius: 0 0 8px 8px !important;
@@ -1076,6 +1120,12 @@ body:has(.theme-pastel) {
   box-sizing: border-box;
   min-width: 0;
   position: relative;
+}
+
+/* More padding specifically for message code blocks (not markdown demo) */
+.message-container .message-content-pre,
+.message-row .message-content-pre {
+  padding: calc(0.5rem + var(--density-padding));
 }
 
 .message-code-copy-btn {
@@ -1112,13 +1162,17 @@ body:has(.theme-pastel) {
 
 /* Unified code styles for ALL code blocks */
 .message-content pre code,
+.message-content-pre code,
 .code-content,
 .code-content code {
   white-space: pre !important;
   font-family: ui-monospace, "SF Mono", monospace;
-  font-size: 0.7rem !important;
-  line-height: 1.4;
+  font-size: var(--code-font-size) !important;
+  line-height: 1.3;
   display: block;
+  margin: 0;
+  padding: 0;
+  /* transition: font-size 150ms ease, padding 150ms ease; */
 }
 
 /* Inline code in messages */
@@ -1632,6 +1686,31 @@ body:has(.theme-pastel) {
   line-height: 1.7;
 }
 
+/* Fix font size for code blocks in markdown content */
+.markdown-demo .message-code-block pre,
+.markdown-demo .message-content-pre,
+.markdown-demo .message-code-block code,
+.markdown-content .message-code-block pre,
+.markdown-content .message-content-pre,
+.markdown-content .message-code-block code {
+  font-size: var(--code-font-size) !important;
+  line-height: 1.4 !important;
+}
+
+/* Make markdown code blocks fit content like message code blocks */
+.markdown-demo,
+.markdown-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.markdown-demo .message-content-pre,
+.markdown-content .message-content-pre {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
 .markdown-content h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -1674,8 +1753,8 @@ body:has(.theme-pastel) {
   padding: var(--spacing-sm) var(--spacing-md);
   border-left: 4px solid var(--accent-primary);
   background: var(--bg-glass);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  /* backdrop-filter: blur(var(--glass-blur)); */
+  /* -webkit-backdrop-filter: blur(var(--glass-blur)); */
   border-radius: var(--radius-md);
 }
 
@@ -1695,6 +1774,11 @@ body:has(.theme-pastel) {
   list-style-type: circle;
 }
 
+.markdown-list li ul,
+.markdown-list li ol {
+  margin-left: calc(var(--spacing-md) + var(--spacing-sm));
+}
+
 ul.markdown-list {
   list-style-type: disc;
 }
@@ -1704,11 +1788,23 @@ ol.markdown-list {
 }
 
 .markdown-code-block {
-  margin: var(--spacing-md) 0;
-  background: var(--bg-primary);
+  margin: 0.5rem 0;
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  border-radius: 8px;
+  overflow: visible;
+}
+
+.markdown-code-block .code-content,
+.markdown-code-block pre {
+  background: #1a1a24 !important;
+  border: none;
+  border-radius: 8px 8px 0 0 !important;
+  padding: calc(0.5rem + var(--density-padding));
+  margin: 0 !important;
+}
+
+.markdown-code-block .code-header {
+  border-radius: 0 0 8px 8px !important;
 }
 
 /* Syntax Highlighting */
@@ -1816,9 +1912,12 @@ ol.markdown-list {
 .markdown-table {
   width: 100%;
   margin: var(--spacing-md) 0;
-  border-collapse: collapse;
-  overflow-x: auto;
-  display: block;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  display: table;
+  border: 1px solid var(--border-default);
 }
 
 .markdown-table th {
@@ -1826,12 +1925,26 @@ ol.markdown-list {
   padding: var(--spacing-sm);
   text-align: left;
   font-weight: 600;
-  border: 1px solid var(--border-default);
+  border-right: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.markdown-table th:last-child {
+  border-right: none;
 }
 
 .markdown-table td {
   padding: var(--spacing-sm);
-  border: 1px solid var(--border-default);
+  border-right: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.markdown-table td:last-child {
+  border-right: none;
+}
+
+.markdown-table tr:last-child td {
+  border-bottom: none;
 }
 
 .markdown-table tr:hover {
@@ -1844,7 +1957,7 @@ ol.markdown-list {
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
   border: 1px solid;
-  animation: fadeIn 0.5s ease;
+  /* animation: fadeIn 0.5s ease; */
 }
 
 .markdown-alert-info {
@@ -1867,6 +1980,26 @@ ol.markdown-list {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  /* Prevent iOS auto-zoom: inputs need 16px, but keep everything else dense */
+  input,
+  textarea,
+  select,
+  .field-input,
+  .field-textarea,
+  .chat-input-field {
+    font-size: 16px !important; /* Only inputs get 16px */
+  }
+
+  /* Make inputs visually denser with tighter line-height in compact mode */
+  .density-compact input,
+  .density-compact textarea,
+  .density-compact .field-input,
+  .density-compact .field-textarea,
+  .density-compact .chat-input-field {
+    line-height: 1.2;
+    padding: 0.375rem 0.5rem; /* Slightly less padding to compensate */
+  }
+
   .playground {
     padding: var(--spacing-md);
     overflow-x: hidden;
@@ -2038,4 +2171,13 @@ ol.markdown-list {
 .code-block pre code {
   white-space: pre !important;
   display: block !important;
+}
+
+/* Disable transitions during theme/density changes */
+.no-transitions .markdown-blockquote,
+.no-transitions .markdown-table,
+.no-transitions .markdown-alert,
+.no-transitions pre,
+.no-transitions code {
+  transition: none !important;
 }
