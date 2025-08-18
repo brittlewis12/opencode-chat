@@ -8,15 +8,22 @@ import "../styles/playground.css";
 
 const themeColors = {
   "liquid-dark": "#0a0a0b",
+  "liquid-dark-orange": "#0a0a0b",
+  "liquid-dark-pink": "#0a0a0b",
+  "liquid-dark-green": "#0a0a0b",
+  "liquid-dark-purple": "#0a0a0b",
+  "liquid-dark-red": "#0a0a0b",
+  "liquid-dark-blue": "#0a0a0b",
+  "liquid-dark-black": "#000000",
   "liquid-light": "#ffffff",
   terminal: "#000000",
   pastel: "#fef3f8",
-  "earth": "#f4f1e8",
-  "ocean": "#0a1628",
-  "forest": "#1a2f1a",
-  "sunset": "#2d1b2e",
-  "monochrome": "#1c1c1c",
-  "coffee": "#3c2415",
+  earth: "#f4f1e8",
+  ocean: "#0a1628",
+  forest: "#1a2f1a",
+  sunset: "#2d1b2e",
+  monochrome: "#1c1c1c",
+  coffee: "#3c2415",
 };
 
 // Custom dropdown component for Safari compatibility
@@ -502,6 +509,13 @@ export default function PlaygroundSimple() {
             onChange={setTheme}
             options={[
               { value: "liquid-dark", label: "Liquid Dark" },
+              { value: "liquid-dark-orange", label: "Liquid Dark (Orange)" },
+              { value: "liquid-dark-pink", label: "Liquid Dark (Pink)" },
+              { value: "liquid-dark-green", label: "Liquid Dark (Green)" },
+              { value: "liquid-dark-purple", label: "Liquid Dark (Purple)" },
+              { value: "liquid-dark-red", label: "Liquid Dark (Red)" },
+              { value: "liquid-dark-blue", label: "Liquid Dark (Blue)" },
+              { value: "liquid-dark-black", label: "Liquid Dark (Black)" },
               { value: "liquid-light", label: "Liquid Light" },
               { value: "terminal", label: "Terminal" },
               { value: "pastel", label: "Pastel" },

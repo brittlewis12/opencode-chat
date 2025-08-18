@@ -20,6 +20,27 @@ body {
 body:has(.theme-liquid-dark) {
   background: #0a0a0b;
 }
+body:has(.theme-liquid-dark-orange) {
+  background: #0a0a0b;
+}
+body:has(.theme-liquid-dark-pink) {
+  background: #0a0a0b;
+}
+body:has(.theme-liquid-dark-green) {
+  background: #0a0a0b;
+}
+body:has(.theme-liquid-dark-purple) {
+  background: #0a0a0b;
+}
+body:has(.theme-liquid-dark-red) {
+  background: #0a0a0b;
+}
+body:has(.theme-liquid-dark-blue) {
+  background: #0a0a0b;
+}
+body:has(.theme-liquid-dark-black) {
+  background: #000000;
+}
 body:has(.theme-liquid-light) {
   background: #ffffff;
 }
@@ -72,6 +93,12 @@ body:has(.theme-coffee) {
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
   --transition-slow: 350ms ease;
+}
+
+/* Global caret color for all inputs */
+input,
+textarea {
+  caret-color: var(--accent-primary);
 }
 
 /* Animations */
@@ -139,31 +166,46 @@ body:has(.theme-coffee) {
   }
 }
 
-/* Liquid Dark Theme (Default) - OKLCH */
+/* Liquid Dark Theme (Default) - OKLCH with Systematic Color Theory */
 .theme-liquid-dark {
   color-scheme: dark;
-  /* Colors in OKLCH for perceptual consistency */
-  --bg-primary: oklch(8% 0.01 270);
-  --bg-secondary: oklch(12% 0.02 270);
-  --bg-elevated: oklch(16% 0.03 270);
-  --bg-glass: oklch(100% 0 0 / 0.03);
 
-  --text-primary: oklch(98% 0 0);
-  --text-secondary: oklch(70% 0.01 270);
-  --text-tertiary: oklch(50% 0.02 270);
+  /* Systematic Lightness Scale (dark theme: 8% -> 95%) */
+  --bg-primary: oklch(0.08 0.015 265); /* Base dark with subtle hue */
+  --bg-secondary: oklch(0.12 0.018 265); /* +4% lightness */
+  --bg-elevated: oklch(0.16 0.02 265); /* +4% lightness */
+  --bg-glass: oklch(0.95 0 0 / 0.03); /* Near white for glass */
 
-  --border-default: oklch(100% 0 0 / 0.06);
-  --border-hover: oklch(100% 0 0 / 0.12);
-  --border-focus: oklch(100% 0 0 / 0.24);
+  /* Text uses high lightness for contrast (WCAG AAA) */
+  --text-primary: oklch(0.95 0 0); /* Pure neutral, high contrast */
+  --text-secondary: oklch(0.7 0.01 265); /* Mid-light with slight tint */
+  --text-tertiary: oklch(0.5 0.015 265); /* Lower contrast for hints */
 
-  --accent-primary: oklch(67% 0.25 265);
-  --accent-secondary: oklch(65% 0.28 285);
-  --accent-gradient: linear-gradient(135deg, oklch(67% 0.25 265), oklch(65% 0.28 285));
+  /* Borders use opacity for subtlety */
+  --border-default: oklch(0.95 0 0 / 0.08);
+  --border-hover: oklch(0.95 0 0 / 0.15);
+  --border-focus: oklch(0.7 0.15 265 / 0.5); /* Accent tinted focus */
 
-  /* Chromatic Aberration Colors */
-  --chromatic-red: rgba(255, 107, 107, 0.15);
-  --chromatic-blue: rgba(77, 171, 247, 0.15);
-  --chromatic-green: rgba(72, 247, 134, 0.15);
+  /* Dark liquid - subtle cyan-teal */
+  --accent-primary: oklch(45% 0.12 195); /* Cyan-teal */
+  --accent-secondary: oklch(40% 0.1 200); /* Deep cyan */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(40% 0.1 190),
+    /* Light cyan */ oklch(45% 0.12 195),
+    /* Cyan-teal */ oklch(40% 0.08 200) /* Deep cyan */
+  );
+
+  /* Semantic colors - very muted */
+  --semantic-error: oklch(0.55 0.1 15); /* Subtle red */
+  --semantic-warning: oklch(0.6 0.08 65); /* Subtle amber */
+  --semantic-success: oklch(0.5 0.08 145); /* Subtle green */
+  --semantic-info: oklch(0.5 0.08 185); /* Subtle teal */
+
+  /* Chromatic Aberration Colors (for special effects) */
+  --chromatic-red: oklch(0.6 0.15 25 / 0.15);
+  --chromatic-blue: oklch(0.65 0.2 245 / 0.15);
+  --chromatic-green: oklch(0.6 0.12 145 / 0.15);
 
   /* Glass Effects */
   --glass-blur: 12px;
@@ -181,25 +223,407 @@ body:has(.theme-coffee) {
   --syntax-module: #c678dd;
 }
 
-/* Liquid Light Theme - OKLCH */
+/* Liquid Dark Orange Variant */
+.theme-liquid-dark-orange {
+  color-scheme: dark;
+
+  /* Same base as liquid dark */
+  --bg-primary: oklch(0.08 0.015 30); /* Warm tinted dark */
+  --bg-secondary: oklch(0.12 0.018 30);
+  --bg-elevated: oklch(0.16 0.02 30);
+  --bg-glass: oklch(0.95 0 0 / 0.03);
+
+  --text-primary: oklch(0.95 0 0);
+  --text-secondary: oklch(0.7 0.01 30);
+  --text-tertiary: oklch(0.5 0.015 30);
+
+  --border-default: oklch(0.95 0 0 / 0.08);
+  --border-hover: oklch(0.95 0 0 / 0.15);
+  --border-focus: oklch(0.7 0.15 30 / 0.5);
+
+  /* Orange accent colors - VIBRANT */
+  --accent-primary: oklch(55% 0.2 45); /* Bright pure orange */
+  --accent-secondary: oklch(50% 0.18 50); /* Golden orange */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(50% 0.18 35),
+    oklch(55% 0.2 45),
+    oklch(50% 0.16 55)
+  );
+
+  --semantic-error: oklch(0.55 0.1 15);
+  --semantic-warning: oklch(0.6 0.08 65);
+  --semantic-success: oklch(0.5 0.08 145);
+  --semantic-info: oklch(0.5 0.08 185);
+
+  --chromatic-red: oklch(0.6 0.15 25 / 0.15);
+  --chromatic-blue: oklch(0.65 0.2 245 / 0.15);
+  --chromatic-green: oklch(0.6 0.12 145 / 0.15);
+
+  --glass-blur: 12px;
+  --glass-opacity: 0.85;
+
+  /* Syntax Highlighting */
+  --syntax-keyword: #c678dd;
+  --syntax-string: #98c379;
+  --syntax-comment: #5c6370;
+  --syntax-function: #61afef;
+  --syntax-variable: #e06c75;
+  --syntax-builtin: #d19a66;
+  --syntax-parameter: #e5c07b;
+  --syntax-type: #56b6c2;
+  --syntax-module: #c678dd;
+}
+
+/* Liquid Dark Pink Variant */
+.theme-liquid-dark-pink {
+  color-scheme: dark;
+
+  --bg-primary: oklch(0.08 0.015 330);
+  --bg-secondary: oklch(0.12 0.018 330);
+  --bg-elevated: oklch(0.16 0.02 330);
+  --bg-glass: oklch(0.95 0 0 / 0.03);
+
+  --text-primary: oklch(0.95 0 0);
+  --text-secondary: oklch(0.7 0.01 330);
+  --text-tertiary: oklch(0.5 0.015 330);
+
+  --border-default: oklch(0.95 0 0 / 0.08);
+  --border-hover: oklch(0.95 0 0 / 0.15);
+  --border-focus: oklch(0.7 0.15 330 / 0.5);
+
+  /* Pink accent colors */
+  --accent-primary: oklch(0.45 0.08 350); /* Dark pink */
+  --accent-secondary: oklch(0.4 0.07 340); /* Deep rose */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(0.35 0.05 330),
+    oklch(0.45 0.08 350),
+    oklch(0.4 0.06 360)
+  );
+
+  --semantic-error: oklch(0.55 0.1 15);
+  --semantic-warning: oklch(0.6 0.08 65);
+  --semantic-success: oklch(0.5 0.08 145);
+  --semantic-info: oklch(0.5 0.08 185);
+
+  --chromatic-red: oklch(0.6 0.15 350 / 0.15);
+  --chromatic-blue: oklch(0.65 0.2 245 / 0.15);
+  --chromatic-green: oklch(0.6 0.12 145 / 0.15);
+
+  --glass-blur: 12px;
+  --glass-opacity: 0.85;
+
+  --syntax-keyword: #c678dd;
+  --syntax-string: #98c379;
+  --syntax-comment: #5c6370;
+  --syntax-function: #61afef;
+  --syntax-variable: #e06c75;
+  --syntax-builtin: #d19a66;
+  --syntax-parameter: #e5c07b;
+  --syntax-type: #56b6c2;
+  --syntax-module: #c678dd;
+}
+
+/* Liquid Dark Green Variant */
+.theme-liquid-dark-green {
+  color-scheme: dark;
+
+  --bg-primary: oklch(0.08 0.015 140);
+  --bg-secondary: oklch(0.12 0.018 140);
+  --bg-elevated: oklch(0.16 0.02 140);
+  --bg-glass: oklch(0.95 0 0 / 0.03);
+
+  --text-primary: oklch(0.95 0 0);
+  --text-secondary: oklch(0.7 0.01 140);
+  --text-tertiary: oklch(0.5 0.015 140);
+
+  --border-default: oklch(0.95 0 0 / 0.08);
+  --border-hover: oklch(0.95 0 0 / 0.15);
+  --border-focus: oklch(0.7 0.15 140 / 0.5);
+
+  /* Green accent colors - VIBRANT */
+  --accent-primary: oklch(55% 0.2 145); /* Bright green */
+  --accent-secondary: oklch(50% 0.18 150); /* Forest green */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(50% 0.18 135),
+    oklch(55% 0.2 145),
+    oklch(50% 0.16 155)
+  );
+
+  --semantic-error: oklch(0.55 0.1 15);
+  --semantic-warning: oklch(0.6 0.08 65);
+  --semantic-success: oklch(0.5 0.08 145);
+  --semantic-info: oklch(0.5 0.08 185);
+
+  --chromatic-red: oklch(0.6 0.15 25 / 0.15);
+  --chromatic-blue: oklch(0.65 0.2 245 / 0.15);
+  --chromatic-green: oklch(0.6 0.12 145 / 0.15);
+
+  --glass-blur: 12px;
+  --glass-opacity: 0.85;
+
+  --syntax-keyword: #c678dd;
+  --syntax-string: #98c379;
+  --syntax-comment: #5c6370;
+  --syntax-function: #61afef;
+  --syntax-variable: #e06c75;
+  --syntax-builtin: #d19a66;
+  --syntax-parameter: #e5c07b;
+  --syntax-type: #56b6c2;
+  --syntax-module: #c678dd;
+}
+
+/* Liquid Dark Purple Variant */
+.theme-liquid-dark-purple {
+  color-scheme: dark;
+
+  --bg-primary: oklch(0.08 0.015 280);
+  --bg-secondary: oklch(0.12 0.018 280);
+  --bg-elevated: oklch(0.16 0.02 280);
+  --bg-glass: oklch(0.95 0 0 / 0.03);
+
+  --text-primary: oklch(0.95 0 0);
+  --text-secondary: oklch(0.7 0.01 280);
+  --text-tertiary: oklch(0.5 0.015 280);
+
+  --border-default: oklch(0.95 0 0 / 0.08);
+  --border-hover: oklch(0.95 0 0 / 0.15);
+  --border-focus: oklch(0.7 0.15 280 / 0.5);
+
+  /* Purple accent colors */
+  --accent-primary: oklch(0.45 0.08 280); /* Dark purple */
+  --accent-secondary: oklch(0.4 0.07 285); /* Deep violet */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(0.35 0.05 270),
+    oklch(0.45 0.08 280),
+    oklch(0.4 0.06 290)
+  );
+
+  --semantic-error: oklch(0.55 0.1 15);
+  --semantic-warning: oklch(0.6 0.08 65);
+  --semantic-success: oklch(0.5 0.08 145);
+  --semantic-info: oklch(0.5 0.08 185);
+
+  --chromatic-red: oklch(0.6 0.15 25 / 0.15);
+  --chromatic-blue: oklch(0.65 0.2 280 / 0.15);
+  --chromatic-green: oklch(0.6 0.12 145 / 0.15);
+
+  --glass-blur: 12px;
+  --glass-opacity: 0.85;
+
+  --syntax-keyword: #c678dd;
+  --syntax-string: #98c379;
+  --syntax-comment: #5c6370;
+  --syntax-function: #61afef;
+  --syntax-variable: #e06c75;
+  --syntax-builtin: #d19a66;
+  --syntax-parameter: #e5c07b;
+  --syntax-type: #56b6c2;
+  --syntax-module: #c678dd;
+}
+
+/* Liquid Dark Red Variant */
+.theme-liquid-dark-red {
+  color-scheme: dark;
+
+  --bg-primary: oklch(8% 0.015 15);
+  --bg-secondary: oklch(12% 0.018 15);
+  --bg-elevated: oklch(16% 0.02 15);
+  --bg-glass: oklch(95% 0 0 / 0.03);
+
+  --text-primary: oklch(95% 0 0);
+  --text-secondary: oklch(70% 0.01 15);
+  --text-tertiary: oklch(50% 0.015 15);
+
+  --border-default: oklch(95% 0 0 / 0.08);
+  --border-hover: oklch(95% 0 0 / 0.15);
+  --border-focus: oklch(70% 0.15 15 / 0.5);
+
+  /* Red accent colors - VIBRANT */
+  --accent-primary: oklch(50% 0.22 20); /* Bright red */
+  --accent-secondary: oklch(45% 0.2 15); /* Deep crimson */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(45% 0.2 10),
+    oklch(50% 0.22 20),
+    oklch(45% 0.18 30)
+  );
+
+  --semantic-error: oklch(
+    35% 0.28 5
+  ); /* Deep blood red for danger in red theme */
+  --semantic-warning: oklch(60% 0.08 65);
+  --semantic-success: oklch(50% 0.08 145);
+  --semantic-info: oklch(50% 0.08 185);
+
+  --chromatic-red: oklch(60% 0.15 15 / 0.15);
+  --chromatic-blue: oklch(65% 0.2 245 / 0.15);
+  --chromatic-green: oklch(60% 0.12 145 / 0.15);
+
+  --glass-blur: 12px;
+  --glass-opacity: 0.85;
+
+  /* Explicit radius values */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --syntax-keyword: #c678dd;
+  --syntax-string: #98c379;
+  --syntax-comment: #5c6370;
+  --syntax-function: #61afef;
+  --syntax-variable: #e06c75;
+  --syntax-builtin: #d19a66;
+  --syntax-parameter: #e5c07b;
+  --syntax-type: #56b6c2;
+  --syntax-module: #c678dd;
+}
+
+/* Liquid Dark Blue Variant */
+.theme-liquid-dark-blue {
+  color-scheme: dark;
+
+  --bg-primary: oklch(8% 0.015 220);
+  --bg-secondary: oklch(12% 0.018 220);
+  --bg-elevated: oklch(16% 0.02 220);
+  --bg-glass: oklch(95% 0 0 / 0.03);
+
+  --text-primary: oklch(95% 0 0);
+  --text-secondary: oklch(70% 0.01 220);
+  --text-tertiary: oklch(50% 0.015 220);
+
+  --border-default: oklch(95% 0 0 / 0.08);
+  --border-hover: oklch(95% 0 0 / 0.15);
+  --border-focus: oklch(70% 0.15 220 / 0.5);
+
+  /* Blue accent colors - VIBRANT */
+  --accent-primary: oklch(55% 0.18 240); /* Bright blue */
+  --accent-secondary: oklch(50% 0.16 250); /* Deep blue */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(50% 0.16 230),
+    oklch(55% 0.18 240),
+    oklch(50% 0.14 250)
+  );
+
+  --semantic-error: oklch(55% 0.1 15);
+  --semantic-warning: oklch(60% 0.08 65);
+  --semantic-success: oklch(50% 0.08 145);
+  --semantic-info: oklch(50% 0.08 185);
+
+  --chromatic-red: oklch(60% 0.15 25 / 0.15);
+  --chromatic-blue: oklch(65% 0.2 220 / 0.15);
+  --chromatic-green: oklch(60% 0.12 145 / 0.15);
+
+  --glass-blur: 12px;
+  --glass-opacity: 0.85;
+
+  /* Explicit radius values */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --syntax-keyword: #c678dd;
+  --syntax-string: #98c379;
+  --syntax-comment: #5c6370;
+  --syntax-function: #61afef;
+  --syntax-variable: #e06c75;
+  --syntax-builtin: #d19a66;
+  --syntax-parameter: #e5c07b;
+  --syntax-type: #56b6c2;
+  --syntax-module: #c678dd;
+}
+
+/* Liquid Dark Black - Pure monochrome */
+.theme-liquid-dark-black {
+  color-scheme: dark;
+
+  --bg-primary: oklch(5% 0 0); /* Near black */
+  --bg-secondary: oklch(8% 0 0);
+  --bg-elevated: oklch(11% 0 0);
+  --bg-glass: oklch(95% 0 0 / 0.02);
+
+  --text-primary: oklch(90% 0 0);
+  --text-secondary: oklch(65% 0 0);
+  --text-tertiary: oklch(45% 0 0);
+
+  --border-default: oklch(90% 0 0 / 0.06);
+  --border-hover: oklch(90% 0 0 / 0.12);
+  --border-focus: oklch(60% 0 0 / 0.3);
+
+  /* Pure grayscale accents */
+  --accent-primary: oklch(30% 0 0); /* Dark gray */
+  --accent-secondary: oklch(25% 0 0); /* Darker gray */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(20% 0 0),
+    oklch(30% 0 0),
+    oklch(25% 0 0)
+  );
+
+  --semantic-error: oklch(45% 0 0);
+  --semantic-warning: oklch(50% 0 0);
+  --semantic-success: oklch(40% 0 0);
+  --semantic-info: oklch(35% 0 0);
+
+  --chromatic-red: transparent;
+  --chromatic-blue: transparent;
+  --chromatic-green: transparent;
+
+  --glass-blur: 8px;
+  --glass-opacity: 0.95;
+
+  /* Explicit radius values */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --syntax-keyword: #808080;
+  --syntax-string: #999999;
+  --syntax-comment: #666666;
+  --syntax-function: #b0b0b0;
+  --syntax-variable: #a0a0a0;
+  --syntax-builtin: #888888;
+  --syntax-parameter: #909090;
+  --syntax-type: #858585;
+  --syntax-module: #959595;
+}
+
+/* Liquid Light Theme - OKLCH with Systematic Color Theory */
 .theme-liquid-light {
   color-scheme: light;
-  --bg-primary: oklch(100% 0 0);
-  --bg-secondary: oklch(98% 0 0);
-  --bg-elevated: oklch(96% 0 0);
-  --bg-glass: oklch(100% 0 0 / 0.7);
 
-  --text-primary: oklch(15% 0 0);
-  --text-secondary: oklch(50% 0.01 0);
-  --text-tertiary: oklch(65% 0.01 0);
+  /* Systematic Lightness Scale (light theme: 100% -> 10%) */
+  --bg-primary: oklch(1 0 0); /* Pure white */
+  --bg-secondary: oklch(0.98 0.002 265); /* -2% with micro tint */
+  --bg-elevated: oklch(0.96 0.004 265); /* -2% with micro tint */
+  --bg-glass: oklch(1 0 0 / 0.8); /* White with transparency */
 
-  --border-default: oklch(0% 0 0 / 0.08);
-  --border-hover: oklch(0% 0 0 / 0.12);
-  --border-focus: oklch(0% 0 0 / 0.2);
+  /* Text uses low lightness for contrast (WCAG AAA) */
+  --text-primary: oklch(0.1 0 0); /* Near black, high contrast */
+  --text-secondary: oklch(0.4 0.01 265); /* Mid-dark with slight tint */
+  --text-tertiary: oklch(0.6 0.008 265); /* Lower contrast for hints */
 
-  --accent-primary: oklch(60% 0.24 255);
-  --accent-secondary: oklch(65% 0.28 285);
-  --accent-gradient: linear-gradient(135deg, oklch(60% 0.24 255), oklch(65% 0.28 285));
+  /* Borders use opacity for subtlety */
+  --border-default: oklch(0.1 0 0 / 0.1);
+  --border-hover: oklch(0.1 0 0 / 0.2);
+  --border-focus: oklch(0.55 0.2 265 / 0.5); /* Accent tinted focus */
+
+  /* Light liquid - like water with light */
+  --accent-primary: oklch(0.55 0.08 220); /* Water blue */
+  --accent-secondary: oklch(0.5 0.07 230); /* Lighter water */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(0.6 0.06 240),
+    /* Light sky reflection */ oklch(0.55 0.08 220),
+    /* Water blue */ oklch(0.5 0.07 210) /* Clear water */
+  );
 
   --chromatic-red: rgba(239, 68, 68, 0.12);
   --chromatic-blue: rgba(59, 130, 246, 0.12);
@@ -214,7 +638,7 @@ body:has(.theme-coffee) {
   --syntax-comment: oklch(55% 0.05 0); /* Medium gray */
   --syntax-function: oklch(40% 0.26 250); /* Dark blue */
   --syntax-variable: oklch(40% 0.24 20); /* Dark red-orange */
-  --syntax-builtin: oklch(45% 0.20 60); /* Dark orange */
+  --syntax-builtin: oklch(45% 0.2 60); /* Dark orange */
   --syntax-parameter: oklch(40% 0.18 45); /* Dark brown */
   --syntax-type: oklch(40% 0.22 200); /* Dark cyan */
   --syntax-module: oklch(40% 0.25 285); /* Deep purple */
@@ -230,15 +654,19 @@ body:has(.theme-coffee) {
 
   --text-primary: oklch(87% 0.29 142);
   --text-secondary: oklch(75% 0.25 142);
-  --text-tertiary: oklch(60% 0.20 142);
+  --text-tertiary: oklch(60% 0.2 142);
 
   --border-default: oklch(87% 0.29 142);
   --border-hover: oklch(87% 0.29 142);
   --border-focus: oklch(87% 0.29 142);
 
   --accent-primary: oklch(87% 0.29 142);
-  --accent-secondary: oklch(80% 0.20 100);
-  --accent-gradient: linear-gradient(135deg, oklch(87% 0.29 142), oklch(87% 0.29 142));
+  --accent-secondary: oklch(80% 0.2 100);
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(87% 0.29 142),
+    oklch(87% 0.29 142)
+  );
 
   --chromatic-red: transparent;
   --chromatic-blue: transparent;
@@ -276,24 +704,35 @@ body:has(.theme-coffee) {
 }
 
 /* Pastel Dream Theme - OKLCH */
+/* Pastel Theme - Analogous Harmony in OKLCH */
 .theme-pastel {
   color-scheme: light;
-  --bg-primary: oklch(97% 0.02 340);
-  --bg-secondary: oklch(94% 0.03 340);
-  --bg-elevated: oklch(91% 0.04 340);
-  --bg-glass: oklch(100% 0 0 / 0.6);
 
-  --text-primary: oklch(35% 0.18 350);
-  --text-secondary: oklch(45% 0.22 350);
-  --text-tertiary: oklch(55% 0.20 350);
+  /* Soft, high-key lightness scale */
+  --bg-primary: oklch(0.98 0.015 350); /* Soft pink tint */
+  --bg-secondary: oklch(0.96 0.02 350); /* Slightly deeper */
+  --bg-elevated: oklch(0.94 0.025 350); /* More saturated */
+  --bg-glass: oklch(1 0.01 350 / 0.7); /* Pink-tinted glass */
 
-  --border-default: oklch(55% 0.20 350 / 0.15);
-  --border-hover: oklch(55% 0.20 350 / 0.25);
-  --border-focus: oklch(55% 0.20 350 / 0.35);
+  /* Deeper but still soft text colors */
+  --text-primary: oklch(0.25 0.12 350); /* Deep rose */
+  --text-secondary: oklch(0.45 0.1 350); /* Medium rose */
+  --text-tertiary: oklch(0.65 0.08 350); /* Light rose */
 
-  --accent-primary: oklch(70% 0.25 350);
-  --accent-secondary: oklch(65% 0.28 285);
-  --accent-gradient: linear-gradient(135deg, oklch(70% 0.25 350), oklch(65% 0.28 285), oklch(60% 0.24 255));
+  /* Harmonious borders */
+  --border-default: oklch(0.85 0.05 350 / 0.2);
+  --border-hover: oklch(0.85 0.08 350 / 0.35);
+  --border-focus: oklch(0.7 0.15 350 / 0.5);
+
+  /* Analogous Harmony: 350° (pink), 20° (peach), 320° (magenta) */
+  --accent-primary: oklch(0.7 0.2 350); /* Rose pink */
+  --accent-secondary: oklch(0.7 0.18 20); /* Peach (analogous +30°) */
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(0.7 0.2 350),
+    /* Rose */ oklch(0.7 0.18 20),
+    /* Peach */ oklch(0.7 0.2 320) /* Magenta (analogous -30°) */
+  );
 
   --chromatic-red: rgba(236, 72, 153, 0.1);
   --chromatic-blue: rgba(59, 130, 246, 0.1);
@@ -309,11 +748,11 @@ body:has(.theme-coffee) {
 
   /* Syntax Highlighting - Pastel colors with good contrast */
   --syntax-keyword: oklch(45% 0.22 320); /* Deep pink */
-  --syntax-string: oklch(40% 0.20 145); /* Forest green */
+  --syntax-string: oklch(40% 0.2 145); /* Forest green */
   --syntax-comment: oklch(55% 0.08 350); /* Muted pink */
   --syntax-function: oklch(45% 0.24 280); /* Purple */
   --syntax-variable: oklch(45% 0.25 10); /* Coral */
-  --syntax-builtin: oklch(50% 0.20 60); /* Orange */
+  --syntax-builtin: oklch(50% 0.2 60); /* Orange */
   --syntax-parameter: oklch(45% 0.18 30); /* Warm brown */
   --syntax-type: oklch(45% 0.22 250); /* Blue */
   --syntax-module: oklch(45% 0.22 320); /* Deep pink */
@@ -337,8 +776,12 @@ body:has(.theme-coffee) {
   --border-focus: oklch(50% 0.05 50 / 0.35);
 
   --accent-primary: oklch(55% 0.12 50);
-  --accent-secondary: oklch(60% 0.10 50);
-  --accent-gradient: linear-gradient(135deg, oklch(55% 0.12 50), oklch(58% 0.11 50));
+  --accent-secondary: oklch(60% 0.1 50);
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(55% 0.12 50),
+    oklch(58% 0.11 50)
+  );
 
   --chromatic-red: rgba(198, 125, 77, 0.1);
   --chromatic-blue: rgba(108, 117, 125, 0.1);
@@ -368,23 +811,29 @@ body:has(.theme-coffee) {
 /* Deep Ocean Theme - OKLCH for perceptual uniformity */
 .theme-ocean {
   color-scheme: dark;
-  /* H=240 for blue tones */
-  --bg-primary: oklch(15% 0.05 240);
-  --bg-secondary: oklch(25% 0.08 240);
-  --bg-elevated: oklch(35% 0.10 240);
-  --bg-glass: oklch(25% 0.08 240 / 0.3);
+  /* Tetradic harmony: cyan, green, coral, violet */
+  --bg-primary: oklch(8% 0.025 200);
+  --bg-secondary: oklch(12% 0.03 200);
+  --bg-elevated: oklch(16% 0.035 200);
+  --bg-glass: oklch(12% 0.03 200 / 0.3);
 
-  --text-primary: oklch(95% 0.02 240);
-  --text-secondary: oklch(85% 0.04 240);
-  --text-tertiary: oklch(70% 0.06 240);
+  --text-primary: oklch(95% 0.01 200);
+  --text-secondary: oklch(75% 0.04 200);
+  --text-tertiary: oklch(55% 0.06 200);
 
-  --border-default: oklch(85% 0.04 240 / 0.15);
-  --border-hover: oklch(85% 0.04 240 / 0.25);
-  --border-focus: oklch(85% 0.04 240 / 0.35);
+  --border-default: oklch(75% 0.04 200 / 0.15);
+  --border-hover: oklch(75% 0.04 200 / 0.25);
+  --border-focus: oklch(70% 0.12 200 / 0.4);
 
-  --accent-primary: oklch(70% 0.18 220);
-  --accent-secondary: oklch(75% 0.15 220);
-  --accent-gradient: linear-gradient(135deg, oklch(70% 0.18 220), oklch(72% 0.16 220));
+  --accent-primary: oklch(65% 0.2 200);
+  --accent-secondary: oklch(60% 0.15 110);
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(65% 0.2 200),
+    oklch(60% 0.15 110),
+    oklch(55% 0.18 20),
+    oklch(60% 0.12 290)
+  );
 
   --chromatic-red: rgba(244, 114, 182, 0.1);
   --chromatic-blue: rgba(56, 189, 248, 0.1);
@@ -422,15 +871,19 @@ body:has(.theme-coffee) {
 
   --text-primary: oklch(93% 0.03 140);
   --text-secondary: oklch(80% 0.08 140);
-  --text-tertiary: oklch(65% 0.10 140);
+  --text-tertiary: oklch(65% 0.1 140);
 
   --border-default: oklch(80% 0.08 140 / 0.15);
   --border-hover: oklch(80% 0.08 140 / 0.25);
   --border-focus: oklch(80% 0.08 140 / 0.35);
 
-  --accent-primary: oklch(65% 0.20 145);
+  --accent-primary: oklch(65% 0.2 145);
   --accent-secondary: oklch(68% 0.18 145);
-  --accent-gradient: linear-gradient(135deg, oklch(65% 0.20 145), oklch(67% 0.19 145));
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(65% 0.2 145),
+    oklch(67% 0.19 145)
+  );
 
   --chromatic-red: rgba(239, 154, 154, 0.1);
   --chromatic-blue: rgba(144, 202, 249, 0.1);
@@ -476,7 +929,11 @@ body:has(.theme-coffee) {
 
   --accent-primary: oklch(65% 0.25 10);
   --accent-secondary: oklch(68% 0.22 10);
-  --accent-gradient: linear-gradient(135deg, oklch(65% 0.25 10), oklch(67% 0.23 10));
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(65% 0.25 10),
+    oklch(67% 0.23 10)
+  );
 
   --chromatic-red: rgba(255, 138, 101, 0.15);
   --chromatic-blue: rgba(186, 104, 200, 0.1);
@@ -504,24 +961,30 @@ body:has(.theme-coffee) {
 }
 
 /* Monochrome Theme - OKLCH */
+/* Monochrome Theme - Perfect Grayscale in OKLCH */
 .theme-monochrome {
   color-scheme: dark;
-  --bg-primary: oklch(10% 0 0);
-  --bg-secondary: oklch(14% 0 0);
-  --bg-elevated: oklch(20% 0 0);
-  --bg-glass: oklch(100% 0 0 / 0.03);
 
-  --text-primary: oklch(92% 0 0);
-  --text-secondary: oklch(65% 0 0);
-  --text-tertiary: oklch(50% 0 0);
+  /* Pure grayscale with mathematical progression */
+  --bg-primary: oklch(0.1 0 0); /* L = 10% */
+  --bg-secondary: oklch(0.14 0 0); /* L = 14% (+4%) */
+  --bg-elevated: oklch(0.18 0 0); /* L = 18% (+4%) */
+  --bg-glass: oklch(0.9 0 0 / 0.05); /* Light glass effect */
 
-  --border-default: oklch(100% 0 0 / 0.08);
-  --border-hover: oklch(100% 0 0 / 0.15);
-  --border-focus: oklch(100% 0 0 / 0.25);
+  /* High contrast text */
+  --text-primary: oklch(0.9 0 0); /* L = 90% (80% difference from bg) */
+  --text-secondary: oklch(0.65 0 0); /* L = 65% */
+  --text-tertiary: oklch(0.45 0 0); /* L = 45% */
 
-  --accent-primary: oklch(45% 0 0);
-  --accent-secondary: oklch(38% 0 0);
-  --accent-gradient: linear-gradient(135deg, oklch(38% 0 0), oklch(32% 0 0));
+  /* Pure monochrome borders */
+  --border-default: oklch(0.9 0 0 / 0.1);
+  --border-hover: oklch(0.9 0 0 / 0.2);
+  --border-focus: oklch(0.9 0 0 / 0.35);
+
+  /* No color, just lightness variation for accents */
+  --accent-primary: oklch(0.5 0 0); /* Medium gray */
+  --accent-secondary: oklch(0.4 0 0); /* Darker gray */
+  --accent-gradient: linear-gradient(135deg, oklch(0.5 0 0), oklch(0.4 0 0));
 
   --chromatic-red: transparent;
   --chromatic-blue: transparent;
@@ -559,7 +1022,7 @@ body:has(.theme-coffee) {
 
   --text-primary: oklch(96% 0.02 60);
   --text-secondary: oklch(82% 0.08 50);
-  --text-tertiary: oklch(68% 0.10 45);
+  --text-tertiary: oklch(68% 0.1 45);
 
   --border-default: oklch(82% 0.08 50 / 0.15);
   --border-hover: oklch(82% 0.08 50 / 0.25);
@@ -567,7 +1030,11 @@ body:has(.theme-coffee) {
 
   --accent-primary: oklch(70% 0.14 50);
   --accent-secondary: oklch(73% 0.12 50);
-  --accent-gradient: linear-gradient(135deg, oklch(70% 0.14 50), oklch(72% 0.13 50));
+  --accent-gradient: linear-gradient(
+    135deg,
+    oklch(70% 0.14 50),
+    oklch(72% 0.13 50)
+  );
 
   --chromatic-red: rgba(205, 133, 63, 0.1);
   --chromatic-blue: rgba(160, 82, 45, 0.1);
@@ -656,10 +1123,10 @@ body:has(.theme-coffee) {
 .playground-header h1 {
   font-size: 2rem;
   font-weight: 700;
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent-primary);
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .controls {
@@ -797,8 +1264,8 @@ body:has(.theme-coffee) {
 }
 
 .custom-select-option.selected {
-  background: var(--accent-primary);
-  color: white;
+  background: color-mix(in oklch, var(--accent-primary) 20%, transparent);
+  color: var(--text-primary);
 }
 
 /* Showcase Grid */
@@ -865,9 +1332,12 @@ body:has(.theme-coffee) {
 }
 
 .btn-primary {
-  background: var(--accent-gradient);
-  color: white;
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  background: color-mix(in oklch, var(--accent-primary) 30%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in oklch, var(--accent-primary) 40%, transparent);
+  color: var(--text-primary);
+  box-shadow: none;
 }
 
 .btn-secondary {
@@ -883,8 +1353,20 @@ body:has(.theme-coffee) {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
+  background: color-mix(
+    in oklch,
+    var(--semantic-error, oklch(0.55 0.1 15)) 30%,
+    transparent
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid
+    color-mix(
+      in oklch,
+      var(--semantic-error, oklch(0.55 0.1 15)) 40%,
+      transparent
+    );
+  color: var(--text-primary);
 }
 
 .btn-glass {
@@ -920,6 +1402,7 @@ body:has(.theme-coffee) {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   color: var(--text-primary);
+  caret-color: var(--accent-primary);
   transition: all var(--transition-fast);
   font-size: var(--density-font-size);
   box-sizing: border-box;
@@ -1259,7 +1742,10 @@ body:has(.theme-coffee) {
 .code-block {
   margin: 0.5rem 0;
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md, 0.5rem); /* fallback to 0.5rem if var not defined */
+  border-radius: var(
+    --radius-md,
+    0.5rem
+  ); /* fallback to 0.5rem if var not defined */
   overflow: visible;
 }
 
@@ -1610,20 +2096,18 @@ button.copy-button:focus-visible {
 }
 
 .message-user {
-  background: linear-gradient(135deg, #5558d9, #7c4fe6);
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background: color-mix(in oklch, var(--accent-primary) 30%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in oklch, var(--accent-primary) 40%, transparent);
+  color: var(--text-primary);
+  text-shadow: none;
 }
 
-/* Override white color in user message code blocks */
+/* User message code blocks now inherit theme colors naturally */
 .message-user pre code,
-.message-user .message-content-pre code,
-.message-user code.hljs,
-.message-user code.language-javascript,
-.message-user code.language-typescript,
-.message-user code.language-python {
-  color: var(--text-primary) !important;
-  text-shadow: none !important;
+.message-user .message-content-pre code {
+  /* No overrides needed - uses theme colors */
 }
 
 /* Ensure syntax highlighting works in user message code blocks */
@@ -1674,38 +2158,14 @@ button.copy-button:focus-visible {
   color: var(--syntax-parameter) !important;
 }
 
-/* Theme-specific user message colors - subtle gradients */
-.theme-liquid-light .message-user {
-  background: linear-gradient(135deg, oklch(60% 0.24 255), oklch(62% 0.22 255));
-}
-
+/* Terminal needs special handling for its unique green aesthetic */
 .theme-terminal .message-user {
-  background: linear-gradient(135deg, oklch(25% 0.15 142), oklch(30% 0.12 142));
-  color: oklch(87% 0.29 142);
-}
-
-.theme-earth .message-user {
-  background: linear-gradient(135deg, #8d6e63, #967a6f);
-}
-
-.theme-ocean .message-user {
-  background: linear-gradient(135deg, #2c5aa0, #3468b8);
-}
-
-.theme-forest .message-user {
-  background: linear-gradient(135deg, #3a7f3e, #468a4a);
-}
-
-.theme-sunset .message-user {
-  background: linear-gradient(135deg, #e04370, #e85d85);
-}
-
-.theme-monochrome .message-user {
-  background: linear-gradient(135deg, #4a4a4a, #555555);
-}
-
-.theme-coffee .message-user {
-  background: linear-gradient(135deg, #7a5940, #896448);
+  background: linear-gradient(
+    135deg,
+    oklch(0.25 0.15 142),
+    oklch(0.3 0.12 142)
+  );
+  color: oklch(0.87 0.29 142);
 }
 
 .message-assistant {
@@ -2074,6 +2534,7 @@ button.copy-button:focus-visible {
   background: transparent;
   border: none;
   color: var(--text-primary);
+  caret-color: var(--accent-primary);
   font-size: var(--density-font-size);
   line-height: 1.5;
   resize: none;
