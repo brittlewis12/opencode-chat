@@ -11,6 +11,12 @@ const themeColors = {
   "liquid-light": "#ffffff",
   terminal: "#000000",
   pastel: "#fef3f8",
+  "earth": "#f4f1e8",
+  "ocean": "#0a1628",
+  "forest": "#1a2f1a",
+  "sunset": "#2d1b2e",
+  "monochrome": "#1c1c1c",
+  "coffee": "#3c2415",
 };
 
 // Custom dropdown component for Safari compatibility
@@ -499,6 +505,12 @@ export default function PlaygroundSimple() {
               { value: "liquid-light", label: "Liquid Light" },
               { value: "terminal", label: "Terminal" },
               { value: "pastel", label: "Pastel" },
+              { value: "earth", label: "Earth Tones" },
+              { value: "ocean", label: "Deep Ocean" },
+              { value: "forest", label: "Forest" },
+              { value: "sunset", label: "Sunset" },
+              { value: "monochrome", label: "Monochrome" },
+              { value: "coffee", label: "Coffee" },
             ]}
           />
           <CustomSelect

@@ -29,6 +29,24 @@ body:has(.theme-terminal) {
 body:has(.theme-pastel) {
   background: #fef3f8;
 }
+body:has(.theme-earth) {
+  background: #f4f1e8;
+}
+body:has(.theme-ocean) {
+  background: #0a1628;
+}
+body:has(.theme-forest) {
+  background: #1a2f1a;
+}
+body:has(.theme-sunset) {
+  background: #2d1b2e;
+}
+body:has(.theme-monochrome) {
+  background: #1c1c1c;
+}
+body:has(.theme-coffee) {
+  background: #3c2415;
+}
 
 /* Base Variables & Theme System - v3 */
 :root {
@@ -121,26 +139,26 @@ body:has(.theme-pastel) {
   }
 }
 
-/* Liquid Dark Theme (Default) */
+/* Liquid Dark Theme (Default) - OKLCH */
 .theme-liquid-dark {
   color-scheme: dark;
-  /* Colors */
-  --bg-primary: #0a0a0b;
-  --bg-secondary: #12121a;
-  --bg-elevated: #1a1a24;
-  --bg-glass: rgba(255, 255, 255, 0.03);
+  /* Colors in OKLCH for perceptual consistency */
+  --bg-primary: oklch(8% 0.01 270);
+  --bg-secondary: oklch(12% 0.02 270);
+  --bg-elevated: oklch(16% 0.03 270);
+  --bg-glass: oklch(100% 0 0 / 0.03);
 
-  --text-primary: #fafafa;
-  --text-secondary: #a8a8b3;
-  --text-tertiary: #6b6b7c;
+  --text-primary: oklch(98% 0 0);
+  --text-secondary: oklch(70% 0.01 270);
+  --text-tertiary: oklch(50% 0.02 270);
 
-  --border-default: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.12);
-  --border-focus: rgba(255, 255, 255, 0.24);
+  --border-default: oklch(100% 0 0 / 0.06);
+  --border-hover: oklch(100% 0 0 / 0.12);
+  --border-focus: oklch(100% 0 0 / 0.24);
 
-  --accent-primary: #6366f1;
-  --accent-secondary: #8b5cf6;
-  --accent-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --accent-primary: oklch(67% 0.25 265);
+  --accent-secondary: oklch(65% 0.28 285);
+  --accent-gradient: linear-gradient(135deg, oklch(67% 0.25 265), oklch(65% 0.28 285));
 
   /* Chromatic Aberration Colors */
   --chromatic-red: rgba(255, 107, 107, 0.15);
@@ -163,25 +181,25 @@ body:has(.theme-pastel) {
   --syntax-module: #c678dd;
 }
 
-/* Liquid Light Theme */
+/* Liquid Light Theme - OKLCH */
 .theme-liquid-light {
   color-scheme: light;
-  --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-elevated: #f3f4f6;
-  --bg-glass: rgba(255, 255, 255, 0.7);
+  --bg-primary: oklch(100% 0 0);
+  --bg-secondary: oklch(98% 0 0);
+  --bg-elevated: oklch(96% 0 0);
+  --bg-glass: oklch(100% 0 0 / 0.7);
 
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
+  --text-primary: oklch(15% 0 0);
+  --text-secondary: oklch(50% 0.01 0);
+  --text-tertiary: oklch(65% 0.01 0);
 
-  --border-default: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(0, 0, 0, 0.12);
-  --border-focus: rgba(0, 0, 0, 0.2);
+  --border-default: oklch(0% 0 0 / 0.08);
+  --border-hover: oklch(0% 0 0 / 0.12);
+  --border-focus: oklch(0% 0 0 / 0.2);
 
-  --accent-primary: #3b82f6;
-  --accent-secondary: #8b5cf6;
-  --accent-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --accent-primary: oklch(60% 0.24 255);
+  --accent-secondary: oklch(65% 0.28 285);
+  --accent-gradient: linear-gradient(135deg, oklch(60% 0.24 255), oklch(65% 0.28 285));
 
   --chromatic-red: rgba(239, 68, 68, 0.12);
   --chromatic-blue: rgba(59, 130, 246, 0.12);
@@ -189,27 +207,38 @@ body:has(.theme-pastel) {
 
   --glass-blur: 16px;
   --glass-opacity: 0.95;
+
+  /* Syntax Highlighting - Light theme colors (darker for contrast) */
+  --syntax-keyword: oklch(40% 0.25 285); /* Deep purple */
+  --syntax-string: oklch(35% 0.22 145); /* Dark green */
+  --syntax-comment: oklch(55% 0.05 0); /* Medium gray */
+  --syntax-function: oklch(40% 0.26 250); /* Dark blue */
+  --syntax-variable: oklch(40% 0.24 20); /* Dark red-orange */
+  --syntax-builtin: oklch(45% 0.20 60); /* Dark orange */
+  --syntax-parameter: oklch(40% 0.18 45); /* Dark brown */
+  --syntax-type: oklch(40% 0.22 200); /* Dark cyan */
+  --syntax-module: oklch(40% 0.25 285); /* Deep purple */
 }
 
-/* Terminal Matrix Theme */
+/* Terminal Matrix Theme - OKLCH */
 .theme-terminal {
   color-scheme: dark;
-  --bg-primary: #000000;
-  --bg-secondary: #0a0a0a;
-  --bg-elevated: #111111;
-  --bg-glass: rgba(0, 255, 0, 0.02);
+  --bg-primary: oklch(0% 0 0);
+  --bg-secondary: oklch(5% 0 0);
+  --bg-elevated: oklch(10% 0 0);
+  --bg-glass: oklch(87% 0.29 142 / 0.02);
 
-  --text-primary: #00ff00;
-  --text-secondary: #00cc00;
-  --text-tertiary: #009900;
+  --text-primary: oklch(87% 0.29 142);
+  --text-secondary: oklch(75% 0.25 142);
+  --text-tertiary: oklch(60% 0.20 142);
 
-  --border-default: #00ff00;
-  --border-hover: #00ff00;
-  --border-focus: #00ff00;
+  --border-default: oklch(87% 0.29 142);
+  --border-hover: oklch(87% 0.29 142);
+  --border-focus: oklch(87% 0.29 142);
 
-  --accent-primary: #00ff00;
-  --accent-secondary: #ffaa00;
-  --accent-gradient: linear-gradient(135deg, #00ff00, #00ff00);
+  --accent-primary: oklch(87% 0.29 142);
+  --accent-secondary: oklch(80% 0.20 100);
+  --accent-gradient: linear-gradient(135deg, oklch(87% 0.29 142), oklch(87% 0.29 142));
 
   --chromatic-red: transparent;
   --chromatic-blue: transparent;
@@ -217,32 +246,54 @@ body:has(.theme-pastel) {
 
   --glass-blur: 0px;
   --glass-opacity: 1;
-
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
 }
 
-/* Pastel Dream Theme */
+/* Terminal theme specific square corners */
+.theme-terminal .btn,
+.theme-terminal .card,
+.theme-terminal .field-input,
+.theme-terminal .field-textarea,
+.theme-terminal .code-block,
+.theme-terminal .message,
+.theme-terminal .message-code-block,
+.theme-terminal .dialog-popup,
+.theme-terminal .tab-panel,
+.theme-terminal .custom-select-trigger,
+.theme-terminal .custom-select-dropdown {
+  border-radius: 0 !important;
+}
+
+.theme-terminal .code-block .code-content,
+.theme-terminal .message-content-pre,
+.theme-terminal .markdown-code-block pre {
+  border-radius: 0 !important;
+}
+
+.theme-terminal .code-block .code-header,
+.theme-terminal .message-code-header,
+.theme-terminal .markdown-code-block .code-header {
+  border-radius: 0 !important;
+}
+
+/* Pastel Dream Theme - OKLCH */
 .theme-pastel {
   color-scheme: light;
-  --bg-primary: #fef3f8;
-  --bg-secondary: #fde8f3;
-  --bg-elevated: #fcdded;
-  --bg-glass: rgba(255, 255, 255, 0.6);
+  --bg-primary: oklch(97% 0.02 340);
+  --bg-secondary: oklch(94% 0.03 340);
+  --bg-elevated: oklch(91% 0.04 340);
+  --bg-glass: oklch(100% 0 0 / 0.6);
 
-  --text-primary: #831843;
-  --text-secondary: #be185d;
-  --text-tertiary: #db2777;
+  --text-primary: oklch(35% 0.18 350);
+  --text-secondary: oklch(45% 0.22 350);
+  --text-tertiary: oklch(55% 0.20 350);
 
-  --border-default: rgba(219, 39, 119, 0.15);
-  --border-hover: rgba(219, 39, 119, 0.25);
-  --border-focus: rgba(219, 39, 119, 0.35);
+  --border-default: oklch(55% 0.20 350 / 0.15);
+  --border-hover: oklch(55% 0.20 350 / 0.25);
+  --border-focus: oklch(55% 0.20 350 / 0.35);
 
-  --accent-primary: #ec4899;
-  --accent-secondary: #a855f7;
-  --accent-gradient: linear-gradient(135deg, #ec4899, #a855f7, #3b82f6);
+  --accent-primary: oklch(70% 0.25 350);
+  --accent-secondary: oklch(65% 0.28 285);
+  --accent-gradient: linear-gradient(135deg, oklch(70% 0.25 350), oklch(65% 0.28 285), oklch(60% 0.24 255));
 
   --chromatic-red: rgba(236, 72, 153, 0.1);
   --chromatic-blue: rgba(59, 130, 246, 0.1);
@@ -255,6 +306,292 @@ body:has(.theme-pastel) {
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
   --radius-xl: 2rem;
+
+  /* Syntax Highlighting - Pastel colors with good contrast */
+  --syntax-keyword: oklch(45% 0.22 320); /* Deep pink */
+  --syntax-string: oklch(40% 0.20 145); /* Forest green */
+  --syntax-comment: oklch(55% 0.08 350); /* Muted pink */
+  --syntax-function: oklch(45% 0.24 280); /* Purple */
+  --syntax-variable: oklch(45% 0.25 10); /* Coral */
+  --syntax-builtin: oklch(50% 0.20 60); /* Orange */
+  --syntax-parameter: oklch(45% 0.18 30); /* Warm brown */
+  --syntax-type: oklch(45% 0.22 250); /* Blue */
+  --syntax-module: oklch(45% 0.22 320); /* Deep pink */
+}
+
+/* Earth Tones Theme - OKLCH for perceptual uniformity */
+.theme-earth {
+  color-scheme: light;
+  /* L=lightness, C=chroma, H=hue (70=warm brown/orange) */
+  --bg-primary: oklch(94% 0.02 70);
+  --bg-secondary: oklch(91% 0.025 70);
+  --bg-elevated: oklch(88% 0.03 70);
+  --bg-glass: oklch(94% 0.02 70 / 0.6);
+
+  --text-primary: oklch(30% 0.08 50);
+  --text-secondary: oklch(40% 0.07 50);
+  --text-tertiary: oklch(50% 0.06 50);
+
+  --border-default: oklch(50% 0.05 50 / 0.15);
+  --border-hover: oklch(50% 0.05 50 / 0.25);
+  --border-focus: oklch(50% 0.05 50 / 0.35);
+
+  --accent-primary: oklch(55% 0.12 50);
+  --accent-secondary: oklch(60% 0.10 50);
+  --accent-gradient: linear-gradient(135deg, oklch(55% 0.12 50), oklch(58% 0.11 50));
+
+  --chromatic-red: rgba(198, 125, 77, 0.1);
+  --chromatic-blue: rgba(108, 117, 125, 0.1);
+  --chromatic-green: rgba(139, 148, 112, 0.1);
+
+  --glass-blur: 8px;
+  --glass-opacity: 0.9;
+
+  /* Explicit radius values */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Syntax Highlighting */
+  --syntax-keyword: #795548;
+  --syntax-string: #689f38;
+  --syntax-comment: #a1887f;
+  --syntax-function: #ff6f00;
+  --syntax-variable: #d84315;
+  --syntax-builtin: #8d6e63;
+  --syntax-parameter: #ffa726;
+  --syntax-type: #5d4037;
+  --syntax-module: #6d4c41;
+}
+
+/* Deep Ocean Theme - OKLCH for perceptual uniformity */
+.theme-ocean {
+  color-scheme: dark;
+  /* H=240 for blue tones */
+  --bg-primary: oklch(15% 0.05 240);
+  --bg-secondary: oklch(25% 0.08 240);
+  --bg-elevated: oklch(35% 0.10 240);
+  --bg-glass: oklch(25% 0.08 240 / 0.3);
+
+  --text-primary: oklch(95% 0.02 240);
+  --text-secondary: oklch(85% 0.04 240);
+  --text-tertiary: oklch(70% 0.06 240);
+
+  --border-default: oklch(85% 0.04 240 / 0.15);
+  --border-hover: oklch(85% 0.04 240 / 0.25);
+  --border-focus: oklch(85% 0.04 240 / 0.35);
+
+  --accent-primary: oklch(70% 0.18 220);
+  --accent-secondary: oklch(75% 0.15 220);
+  --accent-gradient: linear-gradient(135deg, oklch(70% 0.18 220), oklch(72% 0.16 220));
+
+  --chromatic-red: rgba(244, 114, 182, 0.1);
+  --chromatic-blue: rgba(56, 189, 248, 0.1);
+  --chromatic-green: rgba(52, 211, 153, 0.1);
+
+  --glass-blur: 16px;
+  --glass-opacity: 0.85;
+
+  /* Explicit radius values */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Syntax Highlighting */
+  --syntax-keyword: #64b5f6;
+  --syntax-string: #4fc3f7;
+  --syntax-comment: #90a4ae;
+  --syntax-function: #4dd0e1;
+  --syntax-variable: #81c784;
+  --syntax-builtin: #ffb74d;
+  --syntax-parameter: #aed581;
+  --syntax-type: #7986cb;
+  --syntax-module: #ba68c8;
+}
+
+/* Forest Theme - OKLCH for perceptual uniformity */
+.theme-forest {
+  color-scheme: dark;
+  /* H=140 for green tones */
+  --bg-primary: oklch(20% 0.04 140);
+  --bg-secondary: oklch(25% 0.05 140);
+  --bg-elevated: oklch(30% 0.06 140);
+  --bg-glass: oklch(25% 0.05 140 / 0.3);
+
+  --text-primary: oklch(93% 0.03 140);
+  --text-secondary: oklch(80% 0.08 140);
+  --text-tertiary: oklch(65% 0.10 140);
+
+  --border-default: oklch(80% 0.08 140 / 0.15);
+  --border-hover: oklch(80% 0.08 140 / 0.25);
+  --border-focus: oklch(80% 0.08 140 / 0.35);
+
+  --accent-primary: oklch(65% 0.20 145);
+  --accent-secondary: oklch(68% 0.18 145);
+  --accent-gradient: linear-gradient(135deg, oklch(65% 0.20 145), oklch(67% 0.19 145));
+
+  --chromatic-red: rgba(239, 154, 154, 0.1);
+  --chromatic-blue: rgba(144, 202, 249, 0.1);
+  --chromatic-green: rgba(129, 199, 132, 0.15);
+
+  --glass-blur: 12px;
+  --glass-opacity: 0.85;
+
+  /* Explicit radius values */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Syntax Highlighting */
+  --syntax-keyword: #81c784;
+  --syntax-string: #aed581;
+  --syntax-comment: #689f38;
+  --syntax-function: #66bb6a;
+  --syntax-variable: #a5d6a7;
+  --syntax-builtin: #ffb74d;
+  --syntax-parameter: #dce775;
+  --syntax-type: #4fc3f7;
+  --syntax-module: #9ccc65;
+}
+
+/* Sunset Theme - OKLCH for perceptual uniformity */
+.theme-sunset {
+  color-scheme: dark;
+  /* H=330 for pink/purple tones */
+  --bg-primary: oklch(18% 0.05 330);
+  --bg-secondary: oklch(23% 0.07 330);
+  --bg-elevated: oklch(28% 0.09 330);
+  --bg-glass: oklch(23% 0.07 330 / 0.3);
+
+  --text-primary: oklch(95% 0.03 350);
+  --text-secondary: oklch(85% 0.08 350);
+  --text-tertiary: oklch(75% 0.12 350);
+
+  --border-default: oklch(85% 0.08 350 / 0.15);
+  --border-hover: oklch(85% 0.08 350 / 0.25);
+  --border-focus: oklch(85% 0.08 350 / 0.35);
+
+  --accent-primary: oklch(65% 0.25 10);
+  --accent-secondary: oklch(68% 0.22 10);
+  --accent-gradient: linear-gradient(135deg, oklch(65% 0.25 10), oklch(67% 0.23 10));
+
+  --chromatic-red: rgba(255, 138, 101, 0.15);
+  --chromatic-blue: rgba(186, 104, 200, 0.1);
+  --chromatic-green: rgba(255, 183, 77, 0.1);
+
+  --glass-blur: 14px;
+  --glass-opacity: 0.85;
+
+  /* Explicit radius values */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Syntax Highlighting */
+  --syntax-keyword: #ff8a65;
+  --syntax-string: #ffab91;
+  --syntax-comment: #ce93d8;
+  --syntax-function: #ffa726;
+  --syntax-variable: #ff7043;
+  --syntax-builtin: #ffb74d;
+  --syntax-parameter: #ffcc80;
+  --syntax-type: #ff9800;
+  --syntax-module: #ba68c8;
+}
+
+/* Monochrome Theme - OKLCH */
+.theme-monochrome {
+  color-scheme: dark;
+  --bg-primary: oklch(10% 0 0);
+  --bg-secondary: oklch(14% 0 0);
+  --bg-elevated: oklch(20% 0 0);
+  --bg-glass: oklch(100% 0 0 / 0.03);
+
+  --text-primary: oklch(92% 0 0);
+  --text-secondary: oklch(65% 0 0);
+  --text-tertiary: oklch(50% 0 0);
+
+  --border-default: oklch(100% 0 0 / 0.08);
+  --border-hover: oklch(100% 0 0 / 0.15);
+  --border-focus: oklch(100% 0 0 / 0.25);
+
+  --accent-primary: oklch(45% 0 0);
+  --accent-secondary: oklch(38% 0 0);
+  --accent-gradient: linear-gradient(135deg, oklch(38% 0 0), oklch(32% 0 0));
+
+  --chromatic-red: transparent;
+  --chromatic-blue: transparent;
+  --chromatic-green: transparent;
+
+  --glass-blur: 8px;
+  --glass-opacity: 0.95;
+
+  /* Explicit radius values */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Syntax Highlighting */
+  --syntax-keyword: #e0e0e0;
+  --syntax-string: #bdbdbd;
+  --syntax-comment: #757575;
+  --syntax-function: #f5f5f5;
+  --syntax-variable: #e0e0e0;
+  --syntax-builtin: #9e9e9e;
+  --syntax-parameter: #cccccc;
+  --syntax-type: #b0b0b0;
+  --syntax-module: #eeeeee;
+}
+
+/* Coffee Theme - OKLCH for perceptual uniformity */
+.theme-coffee {
+  color-scheme: dark;
+  /* H=40 for brown/coffee tones */
+  --bg-primary: oklch(22% 0.06 40);
+  --bg-secondary: oklch(26% 0.07 40);
+  --bg-elevated: oklch(30% 0.08 40);
+  --bg-glass: oklch(26% 0.07 40 / 0.3);
+
+  --text-primary: oklch(96% 0.02 60);
+  --text-secondary: oklch(82% 0.08 50);
+  --text-tertiary: oklch(68% 0.10 45);
+
+  --border-default: oklch(82% 0.08 50 / 0.15);
+  --border-hover: oklch(82% 0.08 50 / 0.25);
+  --border-focus: oklch(82% 0.08 50 / 0.35);
+
+  --accent-primary: oklch(70% 0.14 50);
+  --accent-secondary: oklch(73% 0.12 50);
+  --accent-gradient: linear-gradient(135deg, oklch(70% 0.14 50), oklch(72% 0.13 50));
+
+  --chromatic-red: rgba(205, 133, 63, 0.1);
+  --chromatic-blue: rgba(160, 82, 45, 0.1);
+  --chromatic-green: rgba(218, 165, 32, 0.1);
+
+  --glass-blur: 10px;
+  --glass-opacity: 0.88;
+
+  /* Explicit radius values */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Syntax Highlighting */
+  --syntax-keyword: #d4af37;
+  --syntax-string: #daa520;
+  --syntax-comment: #8b7355;
+  --syntax-function: #cdaa7d;
+  --syntax-variable: #cd853f;
+  --syntax-builtin: #d2691e;
+  --syntax-parameter: #f4a460;
+  --syntax-type: #deb887;
+  --syntax-module: #bc8f8f;
 }
 
 /* Density Modifiers */
@@ -922,21 +1259,21 @@ body:has(.theme-pastel) {
 .code-block {
   margin: 0.5rem 0;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem); /* fallback to 0.5rem if var not defined */
   overflow: visible;
 }
 
 .code-block .code-content {
-  border-radius: 8px 8px 0 0 !important;
+  border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
 }
 
 .code-block .code-header {
-  border-radius: 0 0 8px 8px !important;
+  border-radius: 0 0 var(--radius-md) var(--radius-md) !important;
 }
 
 .code-header {
-  background: #1a1a24;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border-default);
   padding: 0.25rem 0.75rem;
   display: flex;
   justify-content: space-between;
@@ -968,9 +1305,9 @@ body:has(.theme-pastel) {
 }
 
 .code-content {
-  background: #1a1a24 !important;
+  background: var(--bg-elevated) !important;
   border: none;
-  border-radius: 8px 8px 0 0 !important;
+  border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
   padding: 0.75rem;
   margin: 0 !important;
   color: var(--text-primary);
@@ -1051,7 +1388,7 @@ body:has(.theme-pastel) {
 .message-code-block {
   margin: 0.5rem 0;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: visible;
   width: fit-content;
   max-width: 100%;
@@ -1073,13 +1410,14 @@ body:has(.theme-pastel) {
   transition: opacity 0.2s;
 }
 
-.message-code-wrapper:hover .message-copy-button-wrapper {
+.message-code-wrapper:hover .message-copy-button-wrapper,
+.message-code-wrapper:focus-within .message-copy-button-wrapper {
   opacity: 1;
 }
 
 .message-code-header {
-  background: #1a1a24;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border-default);
   padding: 0.25rem 0.75rem;
   display: flex;
   justify-content: flex-end;
@@ -1101,16 +1439,16 @@ body:has(.theme-pastel) {
 /* Make all message code blocks have proper corners for footer placement */
 
 .message-content .message-code-header {
-  border-radius: 0 0 8px 8px !important;
+  border-radius: 0 0 var(--radius-md) var(--radius-md) !important;
 }
 
 .message-content .message-content-pre {
-  border-radius: 8px 8px 0 0 !important;
+  border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
 }
 
 .message-content pre,
 .message-content-pre {
-  background: #1a1a24 !important;
+  background: var(--bg-elevated) !important;
   border: none;
   border-radius: 0;
   padding: 0.75rem;
@@ -1133,10 +1471,10 @@ body:has(.theme-pastel) {
   top: 0.5rem !important;
   right: 0.5rem !important;
   padding: 0.25rem 0.5rem !important;
-  background: #4a5568 !important;
-  border: 1px solid #718096 !important;
-  border-radius: 0.25rem !important;
-  color: white !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-default) !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--text-secondary) !important;
   font-size: 0.7rem !important;
   cursor: pointer !important;
   opacity: 1 !important;
@@ -1150,14 +1488,89 @@ body:has(.theme-pastel) {
 }
 
 .message-code-copy-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: var(--accent-primary) !important;
+  color: white !important;
 }
 
-/* Override for all message types */
+/* Copy button styles that adapt to theme */
+.copy-button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  outline: none;
+}
+
+.copy-button:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.copy-button:focus {
+  outline: none;
+  background: var(--bg-elevated);
+  border-color: var(--border-focus);
+}
+
+.copy-button:active {
+  background: var(--bg-elevated);
+  transform: scale(0.95);
+}
+
+.copy-button.copied {
+  background: oklch(0.65 0.22 145);
+  color: white;
+  border-color: oklch(0.65 0.22 145);
+}
+
+/* Override focus state even after copied */
+.copy-button:focus,
+.copy-button:focus-visible,
+.copy-button.copied:focus,
+button.copy-button:focus,
+button.copy-button:focus-visible {
+  background: var(--bg-elevated) !important;
+  background-color: var(--bg-elevated) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-focus) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove any Tailwind focus styles */
+.copy-button:focus {
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-width: 0 !important;
+  --tw-ring-offset-color: transparent !important;
+}
+
+/* Safari-specific focus override */
+.copy-button:focus,
+.copy-button:active,
+.copy-button:focus:active {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: var(--bg-elevated) !important;
+  background-color: var(--bg-elevated) !important;
+  color: var(--text-secondary) !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Remove Safari's default button styling */
+.copy-button {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* All message code blocks use the same elevated background */
 .message-user .message-content pre,
 .message-assistant .message-content pre {
-  background: #1a1a24 !important;
+  background: var(--bg-elevated) !important;
 }
 
 /* Unified code styles for ALL code blocks */
@@ -1184,6 +1597,9 @@ body:has(.theme-pastel) {
   font-family: ui-monospace, "SF Mono", monospace;
   font-size: 0.9em;
   color: var(--accent-primary);
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .message {
@@ -1197,6 +1613,99 @@ body:has(.theme-pastel) {
   background: linear-gradient(135deg, #5558d9, #7c4fe6);
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Override white color in user message code blocks */
+.message-user pre code,
+.message-user .message-content-pre code,
+.message-user code.hljs,
+.message-user code.language-javascript,
+.message-user code.language-typescript,
+.message-user code.language-python {
+  color: var(--text-primary) !important;
+  text-shadow: none !important;
+}
+
+/* Ensure syntax highlighting works in user message code blocks */
+.message-user .hljs-keyword,
+.message-user .hljs-selector-tag,
+.message-user .hljs-literal,
+.message-user .hljs-title,
+.message-user .hljs-section,
+.message-user .hljs-doctag {
+  color: var(--syntax-keyword) !important;
+}
+
+.message-user .hljs-string,
+.message-user .hljs-meta .hljs-string,
+.message-user .hljs-regexp {
+  color: var(--syntax-string) !important;
+}
+
+.message-user .hljs-comment,
+.message-user .hljs-quote {
+  color: var(--syntax-comment) !important;
+}
+
+.message-user .hljs-variable,
+.message-user .hljs-template-variable,
+.message-user .hljs-attr,
+.message-user .hljs-tag,
+.message-user .hljs-name,
+.message-user .hljs-selector-id,
+.message-user .hljs-selector-class {
+  color: var(--syntax-variable) !important;
+}
+
+.message-user .hljs-number,
+.message-user .hljs-meta,
+.message-user .hljs-built_in,
+.message-user .hljs-builtin-name,
+.message-user .hljs-type {
+  color: var(--syntax-builtin) !important;
+}
+
+.message-user .hljs-title.function_,
+.message-user .hljs-title.function {
+  color: var(--syntax-function) !important;
+}
+
+.message-user .hljs-params {
+  color: var(--syntax-parameter) !important;
+}
+
+/* Theme-specific user message colors - subtle gradients */
+.theme-liquid-light .message-user {
+  background: linear-gradient(135deg, oklch(60% 0.24 255), oklch(62% 0.22 255));
+}
+
+.theme-terminal .message-user {
+  background: linear-gradient(135deg, oklch(25% 0.15 142), oklch(30% 0.12 142));
+  color: oklch(87% 0.29 142);
+}
+
+.theme-earth .message-user {
+  background: linear-gradient(135deg, #8d6e63, #967a6f);
+}
+
+.theme-ocean .message-user {
+  background: linear-gradient(135deg, #2c5aa0, #3468b8);
+}
+
+.theme-forest .message-user {
+  background: linear-gradient(135deg, #3a7f3e, #468a4a);
+}
+
+.theme-sunset .message-user {
+  background: linear-gradient(135deg, #e04370, #e85d85);
+}
+
+.theme-monochrome .message-user {
+  background: linear-gradient(135deg, #4a4a4a, #555555);
+}
+
+.theme-coffee .message-user {
+  background: linear-gradient(135deg, #7a5940, #896448);
 }
 
 .message-assistant {
@@ -1280,8 +1789,15 @@ body:has(.theme-pastel) {
   font-size: 0.9em;
 }
 
-.message-user .markdown-rendered code {
+.message-user .markdown-rendered code:not(pre code) {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure syntax colors work in user messages for light themes */
+.theme-liquid-light .message-user .markdown-rendered code,
+.theme-pastel .message-user .markdown-rendered code,
+.theme-earth .message-user .markdown-rendered code {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .markdown-rendered pre {
@@ -1702,12 +2218,19 @@ body:has(.theme-pastel) {
 .markdown-content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch; /* Changed from flex-start to stretch */
+  width: 100%;
 }
 
 .markdown-demo .message-content-pre,
 .markdown-content .message-content-pre {
   overflow-x: auto;
+  max-width: 100%;
+}
+
+.markdown-demo .message-code-block,
+.markdown-content .message-code-block {
+  width: 100%;
   max-width: 100%;
 }
 
@@ -1738,7 +2261,9 @@ body:has(.theme-pastel) {
   margin: var(--spacing-sm) 0;
 }
 
-.markdown-content .inline-code {
+.markdown-content .inline-code,
+.markdown-demo .inline-code {
+  display: inline-block;
   padding: 2px 6px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-default);
@@ -1746,6 +2271,10 @@ body:has(.theme-pastel) {
   font-family: ui-monospace, "SF Mono", monospace;
   font-size: 0.9em;
   color: var(--accent-primary);
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  max-width: 100%;
 }
 
 .markdown-blockquote {
@@ -1790,21 +2319,21 @@ ol.markdown-list {
 .markdown-code-block {
   margin: 0.5rem 0;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: visible;
 }
 
 .markdown-code-block .code-content,
 .markdown-code-block pre {
-  background: #1a1a24 !important;
+  background: var(--bg-elevated) !important;
   border: none;
-  border-radius: 8px 8px 0 0 !important;
+  border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
   padding: calc(0.5rem + var(--density-padding));
   margin: 0 !important;
 }
 
 .markdown-code-block .code-header {
-  border-radius: 0 0 8px 8px !important;
+  border-radius: 0 0 var(--radius-md) var(--radius-md) !important;
 }
 
 /* Syntax Highlighting */
@@ -1914,7 +2443,7 @@ ol.markdown-list {
   margin: var(--spacing-md) 0;
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   display: table;
   border: 1px solid var(--border-default);
@@ -2018,6 +2547,46 @@ ol.markdown-list {
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Fix code block overflow on mobile */
+  .message-code-block {
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+    overflow: visible; /* Changed from hidden to allow copy button */
+  }
+
+  .message-code-wrapper {
+    position: relative;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .message-content-pre {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Fix markdown content overflow */
+  .markdown-content,
+  .markdown-demo {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .markdown-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .markdown-blockquote {
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+
   .playground-header {
     flex-direction: column;
     gap: var(--spacing-md);
@@ -2104,10 +2673,7 @@ ol.markdown-list {
   display: block !important;
 }
 
-/* Remove the forced text color so hljs classes can work */
-.hljs * {
-  color: inherit;
-}
+/* Allow hljs classes to apply their colors */
 
 .hljs-keyword,
 .hljs-selector-tag,
